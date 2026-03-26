@@ -2243,7 +2243,11 @@ document.addEventListener('DOMContentLoaded', () => {
   buildMainChart();
   buildAnalyticsChart();
   buildForemanChart();
-  loadLiveDashboard();
+  loadLiveDashboard().then(() => {
+  // re-render current page with live data after load
+  const activePage = document.querySelector('.page.active')?.id?.replace('page-','');
+  if(activePage) navigate(activePage);
+});
   
   // Activate first items for tabs that need it
   // Set initial nav state
