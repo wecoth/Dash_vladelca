@@ -1962,6 +1962,282 @@ function showToast(msg) {
   setTimeout(() => { t.style.opacity = '0'; }, 2500);
 }
 
+// ===== LIVE RENDER: TASKS PAGE =====
+function renderTasksPage(tasks) {
+  const hot = tasks.filter(t => t.overdue);
+  const today = tasks.filter(t => t.today && !t.overdue);
+  const active = tasks.filter(t => (t.status||'') !== 'Выполнена');
+  const done = tasks.filter(t => (t.status||'') === 'Выполнена');
+
+  // Update tab counters
+  const tabs = document.querySelectorAll('#page-tasks .tab');
+  if(tabs[0]) tabs[0].textContent = `🔥 Просроченные (${hot.length})`;
+  if(tabs[1]) tabs[1].textContent = `📅 Сегодня (${today.length})`;
+  if(tabs[2]) tabs[2].textContent = `Все активные (${active.length})`;
+
+  function taskRow(t, mode) {
+    const pri = t.priority === 'high' ? '🔴' : t.priority === 'low' ? '⚪' : '🟡';
+    const dueLabel = taskDueLabel(t);
+    const dueCls = t.overdue ? 'overdue' : t.today ? 'today' : 'soon';
+    const foreman = liveState.foremenMap?.get(String(t.assigned_to||'')) || t.assigned_to || '';
+    if(mode === 'card') return `
+      <div class="task-item">
+        <div class="task-pri">${pri}</div>
+        <div class="task-cb"></div>
+        <div class="task-body">
+          <div class="task-text">${escapeHtml(t.task)}</div>
+          <div class="task-meta">${escapeHtml(t.object||'Без объекта')}${foreman ? ' · ' + escapeHtml(shortForemanName(foreman)) : ''}</div>
+        </div>
+        <div class="task-due ${dueCls}">${escapeHtml(dueLabel)}</div>
+      </div>`;
+    return `<tr><td>${pri}</td><td>${escapeHtml(t.task)}</td><td>${escapeHtml(t.object||'')}</td>
+      <td>${escapeHtml(foreman ? shortForemanName(foreman) : '—')}</td>
+      <td><span class="badge badge-${t.priority==='high'?'red':t.priority==='low'?'gray':'yellow'}">${t.priority==='high'?'Высокий':t.priority==='low'?'Низкий':'Средний'}</span></td>
+      <td class="task-due ${dueCls}">${escapeHtml(dueLabel)}</td>
+      <td><span class="badge badge-${t.overdue?'red':'blue'}">${escapeHtml(t.status||'')}</span></td></tr>`;
+  }
+
+  const hotEl = document.getElementById('tasks-hot');
+  if(hotEl) hotEl.innerHTML = hot.length
+    ? `<div class="grid grid-2"><div class="card">${hot.map(t=>taskRow(t,'card')).join('')}</div>
+       <div class="card"><div class="card-header"><div class="card-title">Задачи сегодня</div></div>${today.map(t=>taskRow(t,'card')).join('')||'<div class="text-sm text-muted">Нет задач на сегодня</div>'}</div></div>`
+    : `<div class="card"><div class="text-sm text-muted" style="padding:8px">Просроченных задач нет 🎉</div></div>`;
+
+  const todayEl = document.getElementById('tasks-today');
+  if(todayEl) todayEl.innerHTML = `<div class="card"><table class="table">
+    <thead><tr><th></th><th>Задача</th><th>Объект</th><th>Прораб</th><th>Приоритет</th><th>Срок</th></tr></thead>
+    <tbody>${today.length ? today.map(t=>taskRow(t,'table')).join('') : '<tr><td colspan="6" class="text-sm text-muted">Нет задач на сегодня</td></tr>'}</tbody>
+  </table></div>`;
+
+  const allEl = document.getElementById('tasks-all');
+  if(allEl) allEl.innerHTML = `<div class="card"><table class="table">
+    <thead><tr><th></th><th>Задача</th><th>Объект</th><th>Прораб</th><th>Приоритет</th><th>Срок</th><th>Статус</th></tr></thead>
+    <tbody>${active.length ? active.map(t=>taskRow(t,'table')).join('') : '<tr><td colspan="7" class="text-sm text-muted">Нет активных задач</td></tr>'}</tbody>
+  </table></div>`;
+
+  const doneEl = document.getElementById('tasks-done');
+  if(doneEl) doneEl.innerHTML = `<div class="card"><table class="table">
+    <thead><tr><th>Задача</th><th>Объект</th><th>Прораб</th><th>Выполнена</th></tr></thead>
+    <tbody>${done.length ? done.map(t=>`<tr><td style="text-decoration:line-through;color:var(--gray4)">${escapeHtml(t.task)}</td>
+      <td>${escapeHtml(t.object||'')}</td><td>${escapeHtml(t.assigned_to ? shortForemanName(liveState.foremenMap?.get(String(t.assigned_to))||t.assigned_to) : '—')}</td>
+      <td>${escapeHtml(t.date_completed||'')}</td></tr>`).join('') : '<tr><td colspan="4" class="text-sm text-muted">Нет выполненных задач</td></tr>'}</tbody>
+  </table></div>`;
+}
+
+// ===== LIVE RENDER: FINANCE PAGE =====
+function renderFinancePage(data) {
+  const { transactions = [], total_income = 0, total_expense = 0, balance = 0 } = data;
+
+  // Metrics
+  const els = {
+    bal: document.querySelector('#page-finance .metric-card.dark .metric-value'),
+    inc: document.querySelectorAll('#page-finance .metric-card')[1]?.querySelector('.metric-value'),
+    exp: document.querySelectorAll('#page-finance .metric-card')[2]?.querySelector('.metric-value'),
+    prof: document.querySelectorAll('#page-finance .metric-card')[3]?.querySelector('.metric-value'),
+  };
+  if(els.bal) els.bal.textContent = '₽' + formatMoney(balance);
+  if(els.inc) { els.inc.textContent = '₽' + formatMoney(total_income); els.inc.style.color = 'var(--green)'; }
+  if(els.exp) { els.exp.textContent = '₽' + formatMoney(total_expense); els.exp.style.color = 'var(--red)'; }
+  if(els.prof) { const p = total_income - total_expense; els.prof.textContent = '₽' + formatMoney(p); els.prof.style.color = p >= 0 ? 'var(--green)' : 'var(--red)'; }
+
+  function txHtml(list) {
+    if(!list.length) return '<div class="text-sm text-muted" style="padding:8px">Нет транзакций</div>';
+    return list.map(t => {
+      const isIncome = t.type === 'Приход';
+      const icon = isIncome ? '💰' : (t.category === 'Материалы' ? '🧱' : t.category === 'Оплата работ' ? '👷' : t.category === 'Доставка' ? '🚗' : '💸');
+      const color = isIncome ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)';
+      const amtCls = isIncome ? 'income' : 'expense';
+      const sign = isIncome ? '+' : '';
+      return `<div class="tx-item">
+        <div class="tx-icon" style="background:${color}">${icon}</div>
+        <div class="tx-info">
+          <div class="tx-desc">${escapeHtml(t.description || t.category || '')}</div>
+          <div class="tx-meta">${escapeHtml(t.object||'')} · ${escapeHtml(t.date||'')}</div>
+        </div>
+        <div class="tx-amount ${amtCls}">${sign}${formatMoney(Math.abs(t.amount))} ₽</div>
+      </div>`;
+    }).join('');
+  }
+
+  const all = document.getElementById('tx-all');
+  const inc = document.getElementById('tx-income');
+  const exp = document.getElementById('tx-expense');
+  if(all) all.innerHTML = txHtml([...transactions].reverse());
+  if(inc) inc.innerHTML = txHtml(transactions.filter(t => t.type === 'Приход').reverse());
+  if(exp) exp.innerHTML = txHtml(transactions.filter(t => t.type === 'Расход').reverse());
+
+  // Margin by objects
+  const marginEl = document.querySelector('#page-finance .card:last-child');
+  if(marginEl && liveState.objects?.length) {
+    const objsWithData = liveState.objects.filter(o => o.contract_amount > 0);
+    if(objsWithData.length) {
+      const rows = objsWithData.map(o => {
+        const pct = o.margin_pct || 0;
+        const tone = pct > 30 ? 'green' : pct > 15 ? 'yellow' : 'red';
+        return `<div style="margin-bottom:14px">
+          <div class="flex-between mb-8" style="font-size:12px">
+            <span>${escapeHtml(o.name)}</span>
+            <span style="color:var(--${tone});font-weight:700">₽${formatMoney(o.margin)} <span style="color:var(--gray4)">(${pct}%)</span></span>
+          </div>
+          <div class="progress"><div class="progress-fill ${tone}" style="width:${Math.min(pct,100)}%"></div></div>
+        </div>`;
+      }).join('');
+      const totalMargin = objsWithData.reduce((s,o) => s + (o.margin||0), 0);
+      marginEl.innerHTML = `<div class="card-header"><div class="card-title">Маржа по объектам</div></div>
+        ${rows}
+        <div class="divider"></div>
+        <div class="flex-between">
+          <span class="text-sm text-muted">Суммарная маржа</span>
+          <span style="font-size:18px;font-weight:800;color:var(--green)">₽${formatMoney(totalMargin)}</span>
+        </div>`;
+    }
+  }
+}
+
+// ===== LIVE RENDER: TEAM PAGE =====
+function renderTeamPage(foremen) {
+  const listEl = document.getElementById('team-list');
+  if(!listEl || !foremen.length) return;
+
+  const colors = ['linear-gradient(135deg,#1a1a1a,#3a3a3a)','linear-gradient(135deg,#1e3a5f,#2563eb)','linear-gradient(135deg,#064e3b,#10b981)','linear-gradient(135deg,#4b5563,#6b7280)','linear-gradient(135deg,#3b0764,#7c3aed)'];
+
+  const items = foremen.map((f, i) => {
+    const initials = f.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    const objCount = (liveState.objects||[]).filter(o => String(o.foreman_id) === String(f.telegram_id)).length;
+    const color = colors[i % colors.length];
+    const dots = Array.from({length:5}, (_,di) => `<div class="load-dot${di < objCount ? ' active' : ''}"></div>`).join('');
+    return `<div class="foreman-item" onclick="selectForeman(this,'${f.row_number}')" style="cursor:pointer">
+      <div class="foreman-av" style="background:${color}">${escapeHtml(initials)}</div>
+      <div class="foreman-info">
+        <div class="foreman-name">${escapeHtml(f.name)}</div>
+        <div class="foreman-meta">${objCount} объект${objCount===1?'':'а'} · ${escapeHtml(f.phone||f.role||'')}</div>
+        <div class="load-dots">${dots}</div>
+      </div>
+      <div style="text-align:right">
+        <div class="text-xs text-muted">${escapeHtml(f.role === 'owner' ? 'Владелец' : 'Прораб')}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  listEl.innerHTML = `<div class="grid grid-2">
+    <div>${items}</div>
+    <div class="card" id="foreman-detail">
+      <div style="text-align:center;padding:32px;color:var(--gray4)">
+        <div style="font-size:32px;margin-bottom:8px">👷</div>
+        <div class="text-sm">Выберите прораба слева</div>
+      </div>
+    </div>
+  </div>`;
+
+  // Rating table
+  const ratingEl = document.getElementById('team-rating');
+  if(ratingEl) ratingEl.innerHTML = `<div class="card"><div class="card-header"><div class="card-title">Прорабы</div></div>
+    <table class="table"><thead><tr><th>#</th><th>Прораб</th><th>Роль</th><th>Телефон</th><th>Объектов</th></tr></thead>
+    <tbody>${foremen.map((f,i) => {
+      const cnt = (liveState.objects||[]).filter(o => String(o.foreman_id) === String(f.telegram_id)).length;
+      return `<tr><td style="font-weight:700">${i+1}</td><td>${escapeHtml(f.name)}</td>
+        <td>${escapeHtml(f.role==='owner'?'Владелец':'Прораб')}</td>
+        <td>${escapeHtml(f.phone||'—')}</td><td>${cnt}</td></tr>`;
+    }).join('')}</tbody></table></div>`;
+}
+
+// ===== LIVE RENDER: ANALYTICS PAGE =====
+function renderAnalyticsPage(objects, transactions) {
+  const tbody = document.querySelector('#page-analytics table tbody');
+  if(tbody && objects.length) {
+    tbody.innerHTML = objects.filter(o => o.contract_amount > 0).map(o => {
+      const pct = o.margin_pct || 0;
+      const tone = pct > 30 ? 'green' : pct > 15 ? 'yellow' : 'red';
+      return `<tr>
+        <td>${escapeHtml(o.name)}</td>
+        <td>₽${formatMoney(o.contract_amount)}</td>
+        <td>₽${formatMoney(o.expense)}</td>
+        <td style="color:var(--${tone});font-weight:600">${pct}%</td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="4" class="text-sm text-muted">Нет данных — заполните суммы договоров</td></tr>';
+  }
+
+  // Category breakdown from transactions
+  const catTotals = {};
+  transactions.filter(t => t.type === 'Расход').forEach(t => {
+    catTotals[t.category] = (catTotals[t.category] || 0) + Math.abs(t.amount);
+  });
+  const totalExp = Object.values(catTotals).reduce((s,v) => s+v, 0);
+  const catEl = document.querySelector('#page-analytics .analytics-bar-row')?.closest('.card');
+  if(catEl && totalExp > 0) {
+    const sorted = Object.entries(catTotals).sort((a,b) => b[1]-a[1]).slice(0,5);
+    catEl.innerHTML = `<div class="card-header"><div class="card-title">Топ расходов</div></div>` +
+      sorted.map(([cat, amt]) => {
+        const pct = Math.round((amt/totalExp)*100);
+        return `<div class="analytics-bar-row">
+          <div class="analytics-bar-label">${escapeHtml(cat)}</div>
+          <div class="analytics-bar-track"><div class="analytics-bar-fill" style="width:${pct}%"></div></div>
+          <div class="analytics-bar-val">${pct}%</div>
+        </div>`;
+      }).join('');
+  }
+}
+
+// ===== LIVE RENDER: CRM PAGE =====
+function renderCrmPage(leads) {
+  const el = document.getElementById('crm-leads');
+  if(!el) return;
+
+  const tabs = document.querySelectorAll('#page-crm .tab');
+  if(tabs[0]) tabs[0].textContent = `Лиды (${leads.length})`;
+
+  const statusColors = { 'переговоры':'blue','замер':'yellow','смета':'yellow','договор':'green' };
+  el.innerHTML = leads.length ? `<div class="card"><table class="table">
+    <thead><tr><th>Имя</th><th>Телефон</th><th>Адрес</th><th>Статус</th><th>Источник</th><th>Сумма</th></tr></thead>
+    <tbody>${leads.map(l => `<tr>
+      <td style="font-weight:600">${escapeHtml(l.client_name||'—')}</td>
+      <td>${escapeHtml(l.phone||'—')}</td>
+      <td>${escapeHtml(l.address||'—')}</td>
+      <td><span class="badge badge-${statusColors[l.status]||'gray'}">${escapeHtml(l.status||'—')}</span></td>
+      <td>${escapeHtml(l.source||'—')}</td>
+      <td>${l.amount ? '₽'+formatMoney(l.amount) : '—'}</td>
+    </tr>`).join('')}</tbody>
+  </table></div>` : `<div class="card"><div class="text-sm text-muted" style="padding:16px">Лидов пока нет. Добавьте первый через кнопку + Добавить лид.</div></div>`;
+}
+
+// ===== PATCH navigate() — загружать данные при переходе =====
+const _origNavigate = navigate;
+navigate = function(page) {
+  _origNavigate(page);
+  if(page === 'tasks' && liveState.tasks) {
+    renderTasksPage(liveState.tasks);
+  }
+  if(page === 'finance') {
+    fetchApi('finance').then(d => {
+      liveState.finance = d;
+      renderFinancePage(d);
+    }).catch(console.error);
+  }
+  if(page === 'team' && liveState.foremen) {
+    renderTeamPage(liveState.foremen);
+  }
+  if(page === 'analytics' && liveState.objects) {
+    renderAnalyticsPage(liveState.objects, liveState.finance?.transactions || []);
+  }
+  if(page === 'crm') {
+    fetchApi('leads').then(d => {
+      liveState.leads = d.leads || [];
+      renderCrmPage(liveState.leads);
+    }).catch(console.error);
+  }
+};
+
+// ===== PATCH loadLiveDashboard — добавить загрузку команды =====
+const _origLoad = loadLiveDashboard;
+loadLiveDashboard = async function() {
+  await _origLoad();
+  try {
+    const teamData = await fetchApi('team');
+    liveState.foremen = teamData.foremen || [];
+    liveState.foremenMap = new Map(liveState.foremen.map(f => [String(f.telegram_id), f.name]));
+  } catch(e) { console.error('team load error', e); }
+};
+  
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded', () => {
   buildMainChart();
