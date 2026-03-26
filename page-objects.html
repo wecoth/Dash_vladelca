@@ -1,0 +1,70 @@
+      <div class="flex-between mb-16">
+        <div class="tabs">
+          <div class="tab active" onclick="setTab(this,'objs-active')">В работе</div>
+          <div class="tab" onclick="setTab(this,'objs-funnel')">Воронка</div>
+          <div class="tab" onclick="setTab(this,'objs-archive')">Архив</div>
+        </div>
+        <button class="btn btn-primary" onclick="goToNewObjectForm()">+ Новый объект</button>
+      </div>
+
+      <!-- ACTIVE OBJECTS -->
+      <div id="objs-active">
+        <div class="grid grid-3" id="objects-grid">
+          <div class="card">
+            <div class="text-sm text-muted" style="padding:12px">
+              Нет объектов. Заполните таблицу «Объекты»:
+              <strong>Наименование объекта</strong>, <strong>Дата начала работ</strong>,
+              <strong>Дата окончания работ</strong>, <strong>Текущий этап</strong>, <strong>Прораб</strong>.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FUNNEL -->
+      <div id="objs-funnel" style="display:none">
+        <div class="card" style="max-width:600px">
+          <div class="card-header"><div class="card-title">Воронка объектов</div></div>
+          <div class="funnel">
+            <div class="funnel-row" onclick="navigate('crm')">
+              <div class="funnel-name">💬 Переговоры</div>
+              <div class="funnel-right"><span class="badge badge-gray">—</span><span style="color:var(--gray4);font-size:12px">›</span></div>
+            </div>
+            <div class="funnel-row" onclick="navigate('crm')">
+              <div class="funnel-name">📐 Замер назначен</div>
+              <div class="funnel-right"><span class="badge badge-gray">—</span><span style="color:var(--gray4);font-size:12px">›</span></div>
+            </div>
+            <div class="funnel-row" onclick="navigate('crm')">
+              <div class="funnel-name">📋 Смета отправлена</div>
+              <div class="funnel-right"><span class="badge badge-gray">—</span><span style="color:var(--gray4);font-size:12px">›</span></div>
+            </div>
+            <div class="funnel-row">
+              <div class="funnel-name">🔨 В работе</div>
+              <div class="funnel-right"><span class="badge badge-gray">—</span><span style="color:var(--gray4);font-size:12px">›</span></div>
+            </div>
+            <div class="funnel-row">
+              <div class="funnel-name">✅ Сданы (за месяц)</div>
+              <div class="funnel-right"><span class="badge badge-gray">—</span><span style="color:var(--gray4);font-size:12px">›</span></div>
+            </div>
+            <div class="funnel-row">
+              <div class="funnel-name">🛡 На гарантии</div>
+              <div class="funnel-right"><span class="badge badge-gray">—</span><span style="color:var(--gray4);font-size:12px">›</span></div>
+            </div>
+          </div>
+          <div class="text-sm text-muted" style="padding-top:10px">
+            Воронка строится из «Лиды»: <strong>status</strong>, <strong>amount</strong>, <strong>address</strong>.
+          </div>
+        </div>
+      </div>
+
+      <!-- ARCHIVE -->
+      <div id="objs-archive" style="display:none">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Архивные объекты</div></div>
+          <table class="table">
+            <thead><tr><th>Объект</th><th>Прораб</th><th>Дата сдачи</th><th>Договор</th><th>Маржа</th><th>Статус</th></tr></thead>
+            <tbody id="objects-archive-body">
+              <tr><td colspan="6" class="text-sm text-muted">Архив появится из «Объекты», если статус = archived.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>

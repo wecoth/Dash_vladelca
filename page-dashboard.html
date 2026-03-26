@@ -1,0 +1,88 @@
+      <!-- METRICS ROW -->
+      <div class="grid grid-4 mb-16">
+        <div class="metric-card dark">
+          <div class="metric-label">Общий баланс</div>
+          <div class="metric-value" id="metric-total-balance">—</div>
+          <div class="metric-delta">
+            <span class="delta-text" id="metric-balance-caption">из таблицы</span>
+          </div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Объектов в работе</div>
+          <div class="metric-value" id="metric-active-objects">—</div>
+          <div class="metric-delta">
+            <span class="delta-text">актуально сейчас</span>
+          </div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Просроченных задач</div>
+          <div class="metric-value" id="metric-overdue-tasks" style="color:var(--red)">—</div>
+          <div class="metric-delta">
+            <span class="delta-text">по «Журнал задач»</span>
+          </div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Суммарная маржа</div>
+          <div class="metric-value" id="metric-total-margin">—</div>
+          <div class="metric-delta">
+            <span style="color:var(--gray4)">по «Объекты»</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-3-2 mb-16" style="grid-template-columns:1.4fr 1fr">
+        <!-- CHART -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Выручка и расходы</div>
+              <div class="card-subtitle">Источник: «Транзакции»</div>
+            </div>
+            <button class="card-action">↗ Подробнее</button>
+          </div>
+          <div class="text-sm text-muted" style="padding:12px">График появится после заполнения транзакций с датой.</div>
+        </div>
+
+        <!-- ALERTS + FORECAST -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Алерты</div>
+            <span class="badge badge-gray">—</span>
+          </div>
+          <div class="text-sm text-muted" style="padding:12px">
+            Алерты появятся после заполнения «Журнал задач» и «Объекты».
+          </div>
+        </div>
+      </div>
+
+      <div class="grid" style="grid-template-columns:1fr 1fr 1fr">
+        <!-- ACTIVE OBJECTS -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Активные объекты</div>
+            <button class="card-action btn-sm" onclick="navigate('objects')">Все →</button>
+          </div>
+          <div id="dashboard-objects-list">
+            <div class="text-sm text-muted" style="padding:8px">Заполните «Объекты».</div>
+          </div>
+        </div>
+
+        <!-- PRОRAB ACTIVITY -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Активность прорабов</div>
+          </div>
+          <div class="text-sm text-muted" style="padding:8px">Данные из «Прорабы» и «Объекты».</div>
+        </div>
+
+        <!-- HOT TASKS -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Горящие задачи</div>
+            <button class="card-action btn-sm" onclick="navigate('tasks')">Все →</button>
+          </div>
+          <div id="dashboard-hot-tasks">
+            <div class="text-sm text-muted" style="padding:8px">Данные из «Журнал задач».</div>
+          </div>
+        </div>
+      </div>

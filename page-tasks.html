@@ -1,0 +1,34 @@
+      <div class="flex-between mb-16">
+        <div class="tabs">
+          <div class="tab active" onclick="setTab(this,'tasks-hot')">🔥 Просроченные</div>
+          <div class="tab" onclick="setTab(this,'tasks-today')">📅 Сегодня</div>
+          <div class="tab" onclick="setTab(this,'tasks-all')">Все активные</div>
+          <div class="tab" onclick="setTab(this,'tasks-done')">✅ Выполненные</div>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('new-task')">+ Новая задача</button>
+      </div>
+
+      <div id="tasks-hot">
+        <div class="card">
+          <div class="text-sm text-muted" style="padding:12px">
+            Нет задач. Заполните «Журнал задач»:
+            <strong>Объект</strong>, <strong>Задача</strong>, <strong>Срок</strong>,
+            <strong>Статус</strong>, <strong>priority</strong>, <strong>assigned_to</strong>.
+          </div>
+        </div>
+      </div>
+      <div id="tasks-today" style="display:none">
+        <div class="card">
+          <div class="text-sm text-muted" style="padding:12px">Задачи на сегодня появятся из «Журнал задач» по полю <strong>Срок</strong>.</div>
+        </div>
+      </div>
+      <div id="tasks-all" style="display:none">
+        <div class="card">
+          <div class="text-sm text-muted" style="padding:12px">Список задач появится из «Журнал задач».</div>
+        </div>
+      </div>
+      <div id="tasks-done" style="display:none">
+        <div class="card">
+          <div class="text-sm text-muted" style="padding:12px">Выполненные задачи появятся из «Журнал задач» по полю <strong>date_completed</strong>.</div>
+        </div>
+      </div>

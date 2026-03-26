@@ -1,0 +1,23 @@
+      <div class="flex-between mb-16">
+        <div class="tabs">
+          <div class="tab active" onclick="setTab(this,'crm-leads')">Лиды</div>
+          <div class="tab" onclick="setTab(this,'crm-funnel')">Воронка</div>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('new-lead')">+ Новый лид</button>
+      </div>
+      <div id="crm-leads">
+        <div class="card">
+          <div class="text-sm text-muted" style="padding:12px">
+            Лиды берутся из таблицы «Лиды»:
+            <strong>client_name</strong>, <strong>phone</strong>, <strong>address</strong>,
+            <strong>status</strong>, <strong>source</strong>, <strong>amount</strong>, <strong>notes</strong>.
+          </div>
+        </div>
+      </div>
+      <div id="crm-funnel" style="display:none">
+        <div class="card">
+          <div class="text-sm text-muted" style="padding:12px">
+            Воронка строится из «Лиды» по полю <strong>status</strong>.
+          </div>
+        </div>
+      </div>

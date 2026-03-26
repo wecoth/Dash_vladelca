@@ -1,0 +1,1610 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>REMB — Кабинет владельца</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#f4f4f0;
+  --white:#ffffff;
+  --black:#0d0d0d;
+  --gray1:#f9f9f7;
+  --gray2:#f0f0ec;
+  --gray3:#e4e4de;
+  --gray4:#b8b8b0;
+  --gray5:#787870;
+  --gray6:#3a3a34;
+  --accent:#0d0d0d;
+  --green:#22c55e;
+  --red:#ef4444;
+  --yellow:#f59e0b;
+  --blue:#3b82f6;
+  --shadow:0 1px 3px rgba(0,0,0,0.06),0 4px 16px rgba(0,0,0,0.04);
+  --shadow-md:0 2px 8px rgba(0,0,0,0.08),0 8px 32px rgba(0,0,0,0.06);
+  --radius:14px;
+  --radius-sm:8px;
+  --sidebar:220px;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--black);font-size:14px;min-height:100vh;display:flex}
+a{text-decoration:none;color:inherit}
+button{font-family:'Inter',sans-serif;cursor:pointer;border:none;outline:none}
+
+/* SIDEBAR */
+.sidebar{
+  width:var(--sidebar);
+  background:var(--white);
+  height:100vh;
+  position:fixed;
+  left:0;top:0;
+  display:flex;flex-direction:column;
+  border-right:1px solid var(--gray3);
+  z-index:100;
+}
+.sidebar-logo{
+  padding:24px 20px 20px;
+  font-size:18px;font-weight:800;letter-spacing:-0.5px;
+  border-bottom:1px solid var(--gray3);
+}
+.sidebar-logo span{color:var(--gray5);font-weight:400}
+.sidebar-nav{flex:1;padding:12px 10px;overflow-y:auto}
+.nav-section{margin-bottom:4px}
+.nav-label{font-size:10px;font-weight:600;color:var(--gray4);letter-spacing:0.08em;text-transform:uppercase;padding:8px 10px 4px}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 10px;border-radius:var(--radius-sm);
+  font-size:13px;font-weight:500;color:var(--gray5);
+  cursor:pointer;transition:all 0.15s;
+  position:relative;
+}
+.nav-item:hover{background:var(--gray2);color:var(--black)}
+.nav-item.active{background:var(--black);color:var(--white)}
+.nav-item .nav-icon{font-size:15px;width:18px;text-align:center;flex-shrink:0}
+.nav-item .nav-badge{
+  margin-left:auto;background:var(--red);color:white;
+  font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;
+}
+.nav-item.active .nav-badge{background:white;color:var(--black)}
+.sidebar-bottom{padding:12px 10px;border-top:1px solid var(--gray3)}
+.sidebar-user{display:flex;align-items:center;gap:10px;padding:8px 10px}
+.user-avatar{width:32px;height:32px;border-radius:8px;background:var(--black);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;flex-shrink:0}
+.user-info{flex:1;min-width:0}
+.user-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-role{font-size:11px;color:var(--gray4)}
+
+/* MAIN */
+.main{margin-left:var(--sidebar);flex:1;min-height:100vh;display:flex;flex-direction:column}
+.topbar{
+  background:var(--white);border-bottom:1px solid var(--gray3);
+  padding:0 28px;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:50;
+}
+.topbar-title{font-size:20px;font-weight:700;letter-spacing:-0.3px}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.topbar-search{
+  display:flex;align-items:center;gap:8px;
+  background:var(--gray2);border:1px solid var(--gray3);border-radius:var(--radius-sm);
+  padding:7px 12px;font-size:13px;color:var(--gray5);
+  width:220px;cursor:text;
+}
+.notif-btn{
+  width:36px;height:36px;border-radius:var(--radius-sm);border:1px solid var(--gray3);
+  background:var(--white);display:flex;align-items:center;justify-content:center;
+  font-size:16px;cursor:pointer;position:relative;
+}
+.notif-btn::after{content:'';position:absolute;top:6px;right:6px;width:7px;height:7px;background:var(--red);border-radius:50%;border:2px solid white}
+.content{padding:24px 28px;flex:1}
+
+/* PAGE */
+.page{display:none}
+.page.active{display:block}
+
+/* PERIOD TABS */
+.period-tabs{display:flex;gap:4px;background:var(--gray2);padding:4px;border-radius:var(--radius-sm);display:inline-flex}
+.period-tab{padding:5px 14px;border-radius:6px;font-size:12px;font-weight:500;color:var(--gray5);cursor:pointer;transition:all 0.15s}
+.period-tab.active{background:var(--white);color:var(--black);box-shadow:0 1px 3px rgba(0,0,0,0.1)}
+.topbar-controls{display:flex;align-items:center;gap:12px}
+.date-range{font-size:12px;color:var(--gray5);background:var(--gray2);padding:6px 12px;border-radius:var(--radius-sm);border:1px solid var(--gray3)}
+
+/* GRID */
+.grid{display:grid;gap:16px}
+.grid-4{grid-template-columns:repeat(4,1fr)}
+.grid-3{grid-template-columns:repeat(3,1fr)}
+.grid-2{grid-template-columns:repeat(2,1fr)}
+.grid-2-1{grid-template-columns:2fr 1fr}
+.grid-1-2{grid-template-columns:1fr 2fr}
+.grid-3-2{grid-template-columns:3fr 2fr}
+
+/* CARD */
+.card{background:var(--white);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+.card-sm{padding:16px}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.card-title{font-size:14px;font-weight:600;letter-spacing:-0.2px}
+.card-subtitle{font-size:12px;color:var(--gray5);margin-top:2px}
+.card-action{font-size:12px;color:var(--gray5);cursor:pointer;padding:5px 10px;border:1px solid var(--gray3);border-radius:6px;background:transparent;transition:all 0.15s}
+.card-action:hover{background:var(--gray2)}
+
+/* METRIC */
+.metric-card{background:var(--white);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+.metric-card.dark{background:var(--black);color:white}
+.metric-label{font-size:12px;color:var(--gray5);font-weight:500;margin-bottom:8px}
+.metric-card.dark .metric-label{color:rgba(255,255,255,0.5)}
+.metric-value{font-size:28px;font-weight:800;letter-spacing:-1px;line-height:1}
+.metric-delta{display:flex;align-items:center;gap:4px;margin-top:8px;font-size:12px}
+.delta-up{color:var(--green)}
+.delta-down{color:var(--red)}
+.delta-text{color:var(--gray4)}
+
+/* CHART */
+.chart-wrap{display:flex;align-items:flex-end;gap:6px;height:120px;padding-top:10px}
+.chart-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.chart-bar{
+  width:100%;border-radius:6px 6px 0 0;background:var(--gray3);
+  transition:all 0.3s;cursor:pointer;position:relative;
+}
+.chart-bar:hover{background:var(--black)}
+.chart-bar.active{background:var(--black)}
+.chart-bar-label{font-size:10px;color:var(--gray4);text-align:center;font-weight:500}
+.chart-bar.active+.chart-bar-label,.chart-bar:hover+.chart-bar-label{color:var(--black);font-weight:600}
+.chart-axes{display:flex;gap:6px;border-top:1px solid var(--gray3);margin-top:4px;padding-top:8px}
+.chart-axis-label{flex:1;text-align:center;font-size:10px;color:var(--gray4)}
+.chart-axis-label.active{color:var(--black);font-weight:600}
+
+/* TABLE */
+.table{width:100%;border-collapse:collapse}
+.table th{font-size:11px;font-weight:600;color:var(--gray4);text-transform:uppercase;letter-spacing:0.05em;padding:8px 12px;text-align:left;border-bottom:1px solid var(--gray3)}
+.table td{padding:12px;font-size:13px;border-bottom:1px solid var(--gray2)}
+.table tr:last-child td{border-bottom:none}
+.table tr:hover td{background:var(--gray1)}
+.table tr{cursor:pointer;transition:0.1s}
+
+/* BADGE */
+.badge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;display:inline-flex;align-items:center;gap:4px}
+.badge-green{background:rgba(34,197,94,0.1);color:#16a34a}
+.badge-red{background:rgba(239,68,68,0.1);color:#dc2626}
+.badge-yellow{background:rgba(245,158,11,0.1);color:#d97706}
+.badge-blue{background:rgba(59,130,246,0.1);color:#2563eb}
+.badge-gray{background:var(--gray2);color:var(--gray5)}
+.badge-black{background:var(--black);color:white}
+
+/* PROGRESS */
+.progress{background:var(--gray2);border-radius:10px;height:6px;overflow:hidden}
+.progress-fill{height:100%;border-radius:10px;background:var(--black);transition:width 0.5s}
+.progress-fill.green{background:var(--green)}
+.progress-fill.yellow{background:var(--yellow)}
+.progress-fill.red{background:var(--red)}
+
+/* TRAFFIC LIGHT */
+.tl-list{display:flex;flex-direction:column;gap:2px}
+.tl-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--gray2)}
+.tl-item:last-child{border-bottom:none}
+.tl-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.tl-green{background:var(--green)}
+.tl-yellow{background:var(--yellow)}
+.tl-red{background:var(--red)}
+.tl-name{flex:1;font-size:13px;font-weight:500}
+.tl-meta{font-size:11px;color:var(--gray4)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;cursor:pointer;transition:all 0.15s;border:none}
+.btn-primary{background:var(--black);color:white}
+.btn-primary:hover{background:var(--gray6)}
+.btn-outline{background:white;color:var(--gray6);border:1px solid var(--gray3)}
+.btn-outline:hover{background:var(--gray2)}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-danger{background:rgba(239,68,68,0.08);color:var(--red);border:1px solid rgba(239,68,68,0.2)}
+
+/* ALERT */
+.alert{border-radius:var(--radius-sm);padding:10px 14px;font-size:12px;display:flex;align-items:flex-start;gap:8px;margin-bottom:8px}
+.alert-red{background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);color:#b91c1c}
+.alert-yellow{background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.15);color:#92400e}
+.alert-blue{background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.15);color:#1d4ed8}
+.alert-icon{flex-shrink:0;font-size:14px}
+
+/* OBJECT CARD */
+.obj-item{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--gray2);cursor:pointer;transition:0.1s}
+.obj-item:last-child{border-bottom:none}
+.obj-item:hover{padding-left:4px}
+.obj-thumb{width:40px;height:40px;border-radius:var(--radius-sm);background:var(--gray2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.obj-info{flex:1;min-width:0}
+.obj-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.obj-meta{font-size:11px;color:var(--gray5)}
+.obj-tags{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
+
+/* DIVIDER */
+.divider{height:1px;background:var(--gray3);margin:16px 0}
+
+/* FOREMAN CARD */
+.foreman-item{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--gray3);border-radius:var(--radius-sm);margin-bottom:8px;cursor:pointer;transition:all 0.15s}
+.foreman-item:hover{background:var(--gray1);border-color:var(--gray4)}
+.foreman-item.selected{border-color:var(--black);background:var(--gray1)}
+.foreman-av{width:38px;height:38px;border-radius:var(--radius-sm);background:var(--black);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:white;flex-shrink:0}
+.foreman-info{flex:1;min-width:0}
+.foreman-name{font-size:13px;font-weight:600}
+.foreman-meta{font-size:11px;color:var(--gray5);margin-top:1px}
+.load-dots{display:flex;gap:3px;margin-top:5px}
+.load-dot{width:8px;height:8px;border-radius:50%;background:var(--gray3)}
+.load-dot.active{background:var(--black)}
+.load-dot.warn{background:var(--yellow)}
+.stars{color:var(--black);font-size:12px}
+
+/* TASK ITEM */
+.task-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--gray2);cursor:pointer}
+.task-item:last-child{border-bottom:none}
+.task-item:hover{padding-left:4px;transition:padding 0.1s}
+.task-cb{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--gray3);flex-shrink:0;margin-top:1px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s}
+.task-cb:hover{border-color:var(--black)}
+.task-cb.done{background:var(--black);border-color:var(--black);color:white;font-size:10px}
+.task-body{flex:1;min-width:0}
+.task-text{font-size:13px;font-weight:500}
+.task-meta{font-size:11px;color:var(--gray4);margin-top:2px}
+.task-due{font-size:11px;flex-shrink:0;font-weight:500}
+.task-due.overdue{color:var(--red)}
+.task-due.today{color:var(--yellow)}
+.task-due.soon{color:var(--gray5)}
+.task-pri{flex-shrink:0;font-size:13px}
+
+/* TX ITEM */
+.tx-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--gray2)}
+.tx-item:last-child{border-bottom:none}
+.tx-icon{width:32px;height:32px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.tx-info{flex:1;min-width:0}
+.tx-desc{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tx-meta{font-size:11px;color:var(--gray4);margin-top:1px}
+.tx-amount{font-size:13px;font-weight:700;flex-shrink:0;color:var(--gray6)}
+.income{color:var(--gray6)}
+.expense{color:var(--gray6)}
+.tx-actions{display:flex;gap:4px;align-items:center}
+.tx-btn{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;border:1px solid var(--gray3);background:white;transition:all 0.15s}
+.tx-btn:hover{border-color:var(--black)}
+
+/* STEP FLOW */
+.stages{display:flex;align-items:center;gap:0;overflow-x:auto;padding:4px 0;scrollbar-width:none}
+.stages::-webkit-scrollbar{display:none}
+.stage{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:5px;padding:0 8px}
+.stage-num{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--gray3);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--gray4)}
+.stage.done .stage-num{background:var(--black);border-color:var(--black);color:white}
+.stage.active .stage-num{background:var(--black);border-color:var(--black);color:white;box-shadow:0 0 0 3px rgba(13,13,13,0.15)}
+.stage-label{font-size:9px;color:var(--gray4);text-align:center;max-width:60px;line-height:1.3}
+.stage.active .stage-label{color:var(--black);font-weight:600}
+.stage.done .stage-label{color:var(--gray5)}
+.stage-arrow{color:var(--gray3);font-size:12px;flex-shrink:0;padding:0 2px}
+
+/* TABS */
+.tabs{display:flex;gap:2px;background:var(--gray2);padding:3px;border-radius:var(--radius-sm);display:inline-flex;margin-bottom:16px}
+.tab{padding:5px 14px;border-radius:6px;font-size:12px;font-weight:500;color:var(--gray5);cursor:pointer;transition:all 0.15s}
+.tab.active{background:white;color:var(--black);box-shadow:0 1px 3px rgba(0,0,0,0.1)}
+
+/* GANTT */
+.gantt-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.gantt-label{font-size:11px;color:var(--gray5);width:110px;flex-shrink:0;text-align:right}
+.gantt-track{flex:1;height:14px;background:var(--gray2);border-radius:7px;overflow:hidden}
+.gantt-fill{height:100%;border-radius:7px}
+
+/* INPUT */
+.input{width:100%;padding:9px 12px;border:1px solid var(--gray3);border-radius:var(--radius-sm);font-size:13px;font-family:'Inter',sans-serif;background:var(--gray1);transition:border 0.15s;outline:none}
+.input:focus{border-color:var(--black);background:white}
+.select{width:100%;padding:9px 12px;border:1px solid var(--gray3);border-radius:var(--radius-sm);font-size:13px;font-family:'Inter',sans-serif;background:var(--gray1);outline:none;cursor:pointer}
+.form-group{margin-bottom:14px}
+.form-label{font-size:12px;font-weight:600;color:var(--gray6);margin-bottom:5px;display:block}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:white;border-radius:var(--radius);padding:24px;width:440px;max-height:90vh;overflow-y:auto;transform:translateY(10px);transition:transform 0.2s}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.modal-title{font-size:16px;font-weight:700}
+.modal-close{width:28px;height:28px;border-radius:6px;background:var(--gray2);border:none;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+
+/* DETAIL PANEL */
+.detail-panel{position:fixed;right:0;top:0;width:420px;height:100vh;background:white;border-left:1px solid var(--gray3);z-index:150;overflow-y:auto;transform:translateX(100%);transition:transform 0.25s ease}
+.detail-panel.open{transform:translateX(0)}
+.dp-header{padding:20px 24px;border-bottom:1px solid var(--gray3);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:white;z-index:10}
+.dp-title{font-size:15px;font-weight:700}
+.dp-close{width:28px;height:28px;border-radius:6px;background:var(--gray2);border:none;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
+.dp-body{padding:20px 24px}
+
+/* VORONKA */
+.funnel{display:flex;flex-direction:column;gap:4px}
+.funnel-row{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:var(--radius-sm);border:1px solid var(--gray3);cursor:pointer;transition:all 0.15s}
+.funnel-row:hover{border-color:var(--black);background:var(--gray1)}
+.funnel-name{font-size:13px;font-weight:500}
+.funnel-right{display:flex;align-items:center;gap:10px}
+
+/* ANALYTICS BARS */
+.analytics-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.analytics-bar-label{font-size:11px;color:var(--gray5);width:90px;flex-shrink:0;text-align:right}
+.analytics-bar-track{flex:1;height:10px;background:var(--gray2);border-radius:5px;overflow:hidden}
+.analytics-bar-fill{height:100%;border-radius:5px;background:var(--black)}
+.analytics-bar-val{font-size:11px;font-weight:600;width:40px;text-align:right;flex-shrink:0}
+
+/* MINI CHART LINE */
+.sparkline{display:flex;align-items:flex-end;gap:3px;height:40px}
+.spark-bar{flex:1;background:var(--gray3);border-radius:2px 2px 0 0;transition:background 0.2s}
+.spark-bar:hover{background:var(--black)}
+
+/* NOTIFICATION BUBBLE */
+.notif-dot{width:6px;height:6px;border-radius:50%;background:var(--red);flex-shrink:0}
+
+/* SEPARATOR */
+.mb-16{margin-bottom:16px}
+.mb-8{margin-bottom:8px}
+.mt-16{margin-top:16px}
+.flex{display:flex}
+.flex-between{display:flex;align-items:center;justify-content:space-between}
+.flex-center{display:flex;align-items:center}
+.gap-8{gap:8px}
+.gap-12{gap:12px}
+.flex-1{flex:1}
+.text-muted{color:var(--gray5)}
+.text-sm{font-size:12px}
+.text-xs{font-size:11px}
+.font-bold{font-weight:700}
+.font-semibold{font-weight:600}
+
+/* CALENDAR */
+.calendar{text-align:center}
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.cal-month{font-size:14px;font-weight:600}
+.cal-nav{width:24px;height:24px;border-radius:6px;background:var(--gray2);border:none;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-day-label{font-size:10px;color:var(--gray4);padding:4px 0;font-weight:600}
+.cal-day{padding:5px 2px;font-size:12px;border-radius:6px;cursor:pointer;transition:all 0.1s}
+.cal-day:hover{background:var(--gray2)}
+.cal-day.today{background:var(--black);color:white;font-weight:600}
+.cal-day.has-event{position:relative}
+.cal-day.has-event::after{content:'';position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--yellow)}
+.cal-day.today.has-event::after{background:white}
+.cal-day.empty{color:var(--gray4);cursor:default}
+
+/* RESPONSIVE scroll for tables */
+.table-scroll{overflow-x:auto}
+
+/* VIDEO PLACEHOLDER */
+.video-ph{height:80px;background:var(--gray2);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:28px;cursor:pointer;border:2px dashed var(--gray3);transition:all 0.15s}
+.video-ph:hover{border-color:var(--black);background:var(--gray1)}
+
+/* AVATAR STACK */
+.avatar-stack{display:flex}
+.avatar-sm{width:24px;height:24px;border-radius:6px;background:var(--black);border:2px solid white;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:white;margin-left:-6px}
+.avatar-sm:first-child{margin-left:0}
+
+/* SCROLL AREA */
+.scroll-area{overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--gray3) transparent}
+.scroll-area::-webkit-scrollbar{width:4px}
+.scroll-area::-webkit-scrollbar-track{background:transparent}
+.scroll-area::-webkit-scrollbar-thumb{background:var(--gray3);border-radius:2px}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">REMB<span>.pro</span></div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">
+      <div class="nav-label">Обзор</div>
+      <div class="nav-item active" onclick="navigate('dashboard')">
+        <span class="nav-icon">⚡</span> Дашборд
+      </div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Управление</div>
+      <div class="nav-item" onclick="navigate('objects')">
+        <span class="nav-icon">🏠</span> Объекты
+        <span class="nav-badge" style="background:rgba(59,130,246,0.15);color:var(--blue)">7</span>
+      </div>
+      <div class="nav-item" onclick="navigate('tasks')">
+        <span class="nav-icon">✅</span> Задачи
+        <span class="nav-badge">3</span>
+      </div>
+      <div class="nav-item" onclick="navigate('finance')">
+        <span class="nav-icon">💰</span> Финансы
+      </div>
+      <div class="nav-item" onclick="navigate('team')">
+        <span class="nav-icon">👷</span> Команда
+      </div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Аналитика</div>
+      <div class="nav-item" onclick="navigate('analytics')">
+        <span class="nav-icon">📊</span> Аналитика
+      </div>
+      <div class="nav-item" onclick="navigate('crm')">
+        <span class="nav-icon">🤝</span> CRM / Лиды
+        <span class="nav-badge" style="background:rgba(245,158,11,0.15);color:var(--yellow)">2</span>
+      </div>
+    </div>
+    <div class="nav-section" style="margin-top:8px">
+      <div class="nav-item" onclick="navigate('settings')">
+        <span class="nav-icon">⚙️</span> Настройки
+      </div>
+    </div>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="sidebar-user">
+      <div class="user-avatar">МА</div>
+      <div class="user-info">
+        <div class="user-name">Максим Андреев</div>
+        <div class="user-role">Владелец</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <!-- TOPBAR -->
+  <div class="topbar" id="topbar">
+    <div class="flex flex-center gap-12">
+      <div class="topbar-title" id="page-title">Дашборд</div>
+      <div class="topbar-controls" id="topbar-controls">
+        <div class="period-tabs">
+          <div class="period-tab active" onclick="setPeriod(this,'day')">День</div>
+          <div class="period-tab" onclick="setPeriod(this,'week')">Неделя</div>
+          <div class="period-tab" onclick="setPeriod(this,'month')">Месяц</div>
+          <div class="period-tab" onclick="setPeriod(this,'year')">Год</div>
+        </div>
+        <div class="date-range">📅 1 мар 2026 — 31 мар 2026</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-search">🔍 &nbsp;Поиск...</div>
+      <div class="notif-btn" onclick="openModal('notifications')">🔔</div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ===== PAGE: DASHBOARD ===== -->
+    <div class="page active" id="page-dashboard" data-partial="partials/page-dashboard.html"></div>
+
+    <!-- ===== PAGE: OBJECTS ===== -->
+    <div class="page" id="page-objects" data-partial="partials/page-objects.html"></div>
+
+    <!-- ===== PAGE: TASKS ===== -->
+    <div class="page" id="page-tasks" data-partial="partials/page-tasks.html"></div>
+
+    <!-- ===== PAGE: FINANCE ===== -->
+    <div class="page" id="page-finance" data-partial="partials/page-finance.html"></div>
+
+    <!-- ===== PAGE: TEAM ===== -->
+    <div class="page" id="page-team" data-partial="partials/page-team.html"></div>
+
+    <!-- ===== PAGE: ANALYTICS ===== -->
+    <div class="page" id="page-analytics" data-partial="partials/page-analytics.html"></div>
+
+    <!-- ===== PAGE: CRM ===== -->
+    <div class="page" id="page-crm" data-partial="partials/page-crm.html"></div>
+
+    <!-- ===== PAGE: SETTINGS ===== -->
+    <div class="page" id="page-settings" data-partial="partials/page-settings.html"></div>
+
+  </div><!-- /content -->
+</main>
+
+<!-- ===== OBJECT DETAIL PANEL ===== -->
+<div class="detail-panel" id="object-panel">
+  <div class="dp-header">
+    <div>
+      <div class="dp-title" id="dp-obj-title">ЖК Любимого, д.16, кв.48</div>
+      <div class="text-xs text-muted" id="dp-obj-meta">Квартира · 78 м² · Алексей Кузнецов</div>
+    </div>
+    <div style="display:flex;gap:6px">
+      <button class="btn btn-outline btn-sm">✏️</button>
+      <button class="dp-close" onclick="closePanel('object-panel')">✕</button>
+    </div>
+  </div>
+  <div class="dp-body">
+    <!-- Stages -->
+    <div class="card card-sm mb-16" style="box-shadow:none;border:1px solid var(--gray3)">
+      <div class="text-xs text-muted mb-8" style="font-weight:600;text-transform:uppercase;letter-spacing:0.05em">Текущий этап</div>
+      <div class="stages">
+        <div class="stage done"><div class="stage-num">✓</div><div class="stage-label">Демонтаж</div></div>
+        <div class="stage-arrow">›</div>
+        <div class="stage done"><div class="stage-num">✓</div><div class="stage-label">Штукатурка</div></div>
+        <div class="stage-arrow">›</div>
+        <div class="stage active"><div class="stage-num">●</div><div class="stage-label">Электро-монтаж</div></div>
+        <div class="stage-arrow">›</div>
+        <div class="stage"><div class="stage-num">4</div><div class="stage-label">Стяжка</div></div>
+        <div class="stage-arrow">›</div>
+        <div class="stage"><div class="stage-num">5</div><div class="stage-label">Отделка</div></div>
+      </div>
+    </div>
+    <div class="grid grid-2 mb-16">
+      <div class="card card-sm" style="box-shadow:none;border:1px solid var(--gray3)">
+        <div class="text-xs text-muted mb-8">Сроки</div>
+        <div class="text-sm">Начало: <strong>10 фев.</strong></div>
+        <div class="text-sm">Сдача: <strong style="color:var(--red)">10 апр.</strong></div>
+        <div class="text-xs text-muted" style="margin-top:4px">Осталось 12 рабочих дней</div>
+      </div>
+      <div class="card card-sm" style="box-shadow:none;border:1px solid var(--gray3)">
+        <div class="text-xs text-muted mb-8">Финансы</div>
+        <div class="text-sm">Договор: <strong>₽480 000</strong></div>
+        <div class="text-sm">Расходы: <strong style="color:var(--red)">₽312 000</strong></div>
+        <div class="text-sm" style="color:var(--green);margin-top:4px;font-weight:600">Маржа: ₽168 000</div>
+      </div>
+    </div>
+    <div class="grid grid-2 mb-16">
+      <button class="btn btn-primary" style="justify-content:center" onclick="navigate('tasks')">✅ Задачи (4)</button>
+      <button class="btn btn-outline" style="justify-content:center" onclick="navigate('finance')">💰 Финансы</button>
+      <button class="btn btn-outline" style="justify-content:center">📸 Медиа (23)</button>
+      <button class="btn btn-outline" style="justify-content:center">📄 Документы</button>
+    </div>
+    <div class="grid grid-2 mb-16">
+      <button class="btn btn-outline" style="justify-content:center" onclick="openModal('change-stage')">🔄 Этап</button>
+      <button class="btn btn-outline" style="justify-content:center">👷 Сменить прораба</button>
+    </div>
+    <div class="grid grid-2">
+      <button class="btn btn-outline" style="justify-content:center">🔗 Портал клиента</button>
+      <button class="btn btn-outline" style="justify-content:center">📁 Google Drive</button>
+    </div>
+    <div class="divider"></div>
+    <div class="card-title text-sm mb-8">Последние задачи</div>
+    <div class="task-item"><div class="task-pri">🔴</div><div class="task-cb"></div><div class="task-body"><div class="task-text">Проверить электромонтаж</div><div class="task-meta">Алексей К.</div></div><div class="task-due overdue">-2 дня</div></div>
+    <div class="task-item"><div class="task-pri">🟡</div><div class="task-cb"></div><div class="task-body"><div class="task-text">Заказать розетки Legrand</div><div class="task-meta">Алексей К.</div></div><div class="task-due today">сегодня</div></div>
+  </div>
+</div>
+
+<!-- ===== TASK DETAIL PANEL ===== -->
+<div class="detail-panel" id="task-panel">
+  <div class="dp-header">
+    <div>
+      <div class="dp-title">Проверить электромонтаж</div>
+      <div class="text-xs text-muted">ЖК Любимого, кв.48 · Алексей Кузнецов</div>
+    </div>
+    <div style="display:flex;gap:6px">
+      <span class="badge badge-red">Просрочена</span>
+      <button class="dp-close" onclick="closePanel('task-panel')">✕</button>
+    </div>
+  </div>
+  <div class="dp-body">
+    <div class="grid grid-2 mb-16">
+      <div class="card card-sm" style="box-shadow:none;border:1px solid var(--gray3)">
+        <div class="text-xs text-muted mb-4">Срок</div>
+        <div style="font-size:13px;color:var(--red);font-weight:600">23 марта 2026</div>
+      </div>
+      <div class="card card-sm" style="box-shadow:none;border:1px solid var(--gray3)">
+        <div class="text-xs text-muted mb-4">Приоритет</div>
+        <div style="font-size:13px;font-weight:600">🔴 Высокий</div>
+      </div>
+    </div>
+    <div class="card card-sm mb-16" style="box-shadow:none;border:1px solid var(--gray3)">
+      <div class="text-xs text-muted mb-8">📹 Видео-задача</div>
+      <div class="video-ph">▶️</div>
+      <div class="text-xs text-muted" style="margin-top:6px">Видео 0:43 · добавлено 20 марта</div>
+    </div>
+    <div class="card card-sm mb-16" style="box-shadow:none;border:1px solid var(--gray3)">
+      <div class="text-xs text-muted mb-8">Транскрипт задачи (AI)</div>
+      <div class="text-sm text-muted" style="line-height:1.6">«Нужно проверить все розеточные группы перед заливкой. Особенно в кухне — там было замечание по высоте монтажа...»</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="btn btn-primary" style="justify-content:center" onclick="completeTask()">✅ Отметить выполненной</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-outline flex-1" style="justify-content:center">📅 Перенести срок</button>
+        <button class="btn btn-outline flex-1" style="justify-content:center">🔁 Переназначить</button>
+      </div>
+      <button class="btn btn-danger" style="justify-content:center">🗑 Удалить задачу</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODALS ===== -->
+
+<!-- NEW OBJECT -->
+<div class="modal-overlay" id="modal-new-object" onclick="closeModalOutside(event,'new-object')">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">➕ Новый объект</div>
+      <button class="modal-close" onclick="closeModal('new-object')">✕</button>
+    </div>
+    <div class="form-group"><label class="form-label">Адрес объекта</label><input class="input" placeholder="Например: ЖК Любимого, д.16, кв.48"></div>
+    <div class="grid grid-2" style="gap:12px">
+      <div class="form-group"><label class="form-label">Тип</label><select class="select"><option>Квартира</option><option>Дом</option><option>Коммерция</option></select></div>
+      <div class="form-group"><label class="form-label">Площадь (м²)</label><input class="input" placeholder="68" type="number"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Назначить прораба</label><select class="select"><option>Алексей Кузнецов</option><option>Дмитрий Власов</option><option>Сергей Михайлов</option><option>Николай Романов</option><option>Игорь Тихонов</option></select></div>
+    <div class="grid grid-2" style="gap:12px">
+      <div class="form-group"><label class="form-label">Дата начала</label><input class="input" type="date"></div>
+      <div class="form-group"><label class="form-label">Сумма договора (₽)</label><input class="input" placeholder="480000" type="number"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Имя заказчика</label><input class="input" placeholder="Фамилия Имя Отчество"></div>
+    <div class="alert alert-blue mb-16"><span class="alert-icon">📁</span>Папки на Google Drive создадутся автоматически</div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="createObject()">Создать объект</button>
+  </div>
+</div>
+
+<!-- NEW TASK -->
+<div class="modal-overlay" id="modal-new-task" onclick="closeModalOutside(event,'new-task')">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">✅ Новая задача</div>
+      <button class="modal-close" onclick="closeModal('new-task')">✕</button>
+    </div>
+    <div class="form-group"><label class="form-label">Задача</label><input class="input" placeholder="Что нужно сделать?"></div>
+    <div class="form-group"><label class="form-label">Или загрузить видео-задачу</label><div class="video-ph" style="height:60px;font-size:20px">📹 Загрузить видео</div></div>
+    <div class="form-group"><label class="form-label">Объект</label><select class="select"><option>ЖК Любимого, кв.48</option><option>мкр. Покровский, кв.12</option><option>ЖК Все Свои, кв.91</option></select></div>
+    <div class="form-group"><label class="form-label">Прораб</label><select class="select"><option>Алексей Кузнецов</option><option>Дмитрий Власов</option><option>Сергей Михайлов</option></select></div>
+    <div class="grid grid-2" style="gap:12px">
+      <div class="form-group"><label class="form-label">Срок</label><input class="input" type="date"></div>
+      <div class="form-group"><label class="form-label">Приоритет</label><select class="select"><option>🔴 Высокий</option><option>🟡 Средний</option><option>⚪ Низкий</option></select></div>
+    </div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="createTask()">Создать задачу</button>
+  </div>
+</div>
+
+<!-- NEW TRANSACTION -->
+<div class="modal-overlay" id="modal-new-tx" onclick="closeModalOutside(event,'new-tx')">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">💰 Новая транзакция</div>
+      <button class="modal-close" onclick="closeModal('new-tx')">✕</button>
+    </div>
+    <div class="form-group"><label class="form-label">Описание</label><input class="input" placeholder="Купил плитку / Поступил аванс..."></div>
+    <div class="grid grid-2" style="gap:12px">
+      <div class="form-group"><label class="form-label">Тип</label><select class="select"><option>Расход</option><option>Приход</option></select></div>
+      <div class="form-group"><label class="form-label">Сумма (₽)</label><input class="input" placeholder="47800" type="number"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Объект</label><select class="select"><option>ЖК Любимого, кв.48</option><option>мкр. Покровский, кв.12</option><option>ЖК Все Свои, кв.91</option></select></div>
+    <div class="form-group"><label class="form-label">Категория</label><select class="select"><option>Материалы</option><option>Оплата работ</option><option>Аванс мастерам</option><option>Доставка</option><option>Инструмент</option><option>Поступление от заказчика</option></select></div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="createTx()">Записать транзакцию</button>
+  </div>
+</div>
+
+<!-- NOTIFICATIONS -->
+<div class="modal-overlay" id="modal-notifications" onclick="closeModalOutside(event,'notifications')">
+  <div class="modal" style="width:380px">
+    <div class="modal-header">
+      <div class="modal-title">🔔 Уведомления</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="text-xs text-muted" style="cursor:pointer">Прочитать все</span>
+        <button class="modal-close" onclick="closeModal('notifications')">✕</button>
+      </div>
+    </div>
+    <div class="alert alert-red mb-8"><span class="alert-icon">🚨</span><div><strong>Нет активности</strong><div class="text-xs" style="margin-top:2px">ЖК Любимого — Николай Романов молчит 3 дня</div></div></div>
+    <div class="alert alert-yellow mb-8"><span class="alert-icon">⚠️</span><div><strong>Перерасход бюджета</strong><div class="text-xs" style="margin-top:2px">мкр. Покровский — 85% бюджета израсходовано</div></div></div>
+    <div class="alert alert-blue mb-8"><span class="alert-icon">🔔</span><div><strong>Запрос аванса</strong><div class="text-xs" style="margin-top:2px">Алексей К. запросил 30 000 ₽ на бригаду</div></div></div>
+    <div class="alert alert-blue"><span class="alert-icon">💰</span><div><strong>Ожидается поступление</strong><div class="text-xs" style="margin-top:2px">ЖК Все Свои — транш 200 000 ₽ через 5 дней</div></div></div>
+  </div>
+</div>
+
+<!-- CHANGE STAGE -->
+<div class="modal-overlay" id="modal-change-stage" onclick="closeModalOutside(event,'change-stage')">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">🔄 Сменить этап</div>
+      <button class="modal-close" onclick="closeModal('change-stage')">✕</button>
+    </div>
+    <div class="funnel" id="stage-list">
+      <!-- filled by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- NEW FOREMAN -->
+<div class="modal-overlay" id="modal-new-foreman" onclick="closeModalOutside(event,'new-foreman')">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">👷 Добавить прораба</div>
+      <button class="modal-close" onclick="closeModal('new-foreman')">✕</button>
+    </div>
+    <div class="form-group"><label class="form-label">Имя</label><input class="input" placeholder="Фамилия Имя"></div>
+    <div class="form-group"><label class="form-label">Телефон</label><input class="input" placeholder="+7 (900) 000-00-00"></div>
+    <div class="form-group"><label class="form-label">Telegram ID</label><input class="input" placeholder="123456789"></div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="showToast('✅ Прораб добавлен');closeModal('new-foreman')">Добавить</button>
+  </div>
+</div>
+
+<!-- NEW LEAD -->
+<div class="modal-overlay" id="modal-new-lead" onclick="closeModalOutside(event,'new-lead')">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">🤝 Новый лид</div>
+      <button class="modal-close" onclick="closeModal('new-lead')">✕</button>
+    </div>
+    <div class="form-group"><label class="form-label">Имя клиента</label><input class="input" placeholder="Фамилия Имя Отчество"></div>
+    <div class="form-group"><label class="form-label">Телефон</label><input class="input" placeholder="+7 (900) 000-00-00"></div>
+    <div class="form-group"><label class="form-label">Объект</label><input class="input" placeholder="Адрес или описание"></div>
+    <div class="form-group"><label class="form-label">Примерная сумма</label><input class="input" placeholder="400000" type="number"></div>
+    <div class="form-group"><label class="form-label">Источник</label><select class="select"><option>Сарафанное радио</option><option>Instagram</option><option>Сайт</option><option>Avito</option><option>Рекомендация</option></select></div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="showToast('✅ Лид добавлен');closeModal('new-lead')">Добавить лид</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" style="position:fixed;bottom:24px;right:24px;background:var(--black);color:white;padding:12px 20px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;opacity:0;transition:opacity 0.3s;z-index:500;pointer-events:none">
+  ✅ Готово
+</div>
+
+<script src="./api-config.js"></script>
+<script>
+const API_BASE_URL = (window.REMB_CONFIG?.apiBaseUrl || '').trim().replace(/\/$/, '');
+const liveState = {
+  dashboard: null,
+  objects: [],
+  tasks: [],
+};
+
+// ===== NAVIGATION =====
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  
+  const titles = {
+    dashboard:'Дашборд', objects:'Объекты', tasks:'Задачи',
+    finance:'Финансы', team:'Команда', analytics:'Аналитика',
+    crm:'CRM / Лиды', settings:'Настройки'
+  };
+  document.getElementById('page-title').textContent = titles[page] || page;
+  
+  const navItems = document.querySelectorAll('.nav-item');
+  navItems.forEach(item => {
+    if(item.getAttribute('onclick') && item.getAttribute('onclick').includes("'"+page+"'")) {
+      item.classList.add('active');
+    }
+  });
+  
+  const ctrl = document.getElementById('topbar-controls');
+  ctrl.style.display = page === 'dashboard' ? 'flex' : 'none';
+  
+  // Close any open panels
+  closePanel('object-panel');
+  closePanel('task-panel');
+}
+
+// ===== TABS =====
+function setTab(el, id) {
+  const parent = el.closest('.tabs');
+  parent.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  
+  // Find all sibling content divs (look for IDs with same prefix pattern)
+  const prefix = id.split('-')[0] + '-';
+  document.querySelectorAll('[id^="'+prefix+'"]').forEach(d => {
+    d.style.display = 'none';
+  });
+  const target = document.getElementById(id);
+  if(target) target.style.display = 'block';
+}
+
+// ===== PERIOD =====
+function setPeriod(el) {
+  document.querySelectorAll('.period-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ===== MODALS =====
+function openModal(name) {
+  const el = document.getElementById('modal-'+name);
+  if(el) { el.classList.add('open'); }
+  if(name === 'change-stage') buildStageList();
+}
+function closeModal(name) {
+  const el = document.getElementById('modal-'+name);
+  if(el) el.classList.remove('open');
+}
+function closeModalOutside(e, name) {
+  if(e.target === e.currentTarget) closeModal(name);
+}
+
+// ===== PANELS =====
+function openObjectDetail(id) {
+  document.getElementById('object-panel').classList.add('open');
+}
+function openTaskDetail(id) {
+  document.getElementById('task-panel').classList.add('open');
+}
+function closePanel(id) {
+  const el = document.getElementById(id);
+  if(el) el.classList.remove('open');
+}
+
+// ===== TASKS =====
+function toggleTask(e, id) {
+  e.stopPropagation();
+  const cb = document.getElementById('cb-'+id);
+  if(cb) {
+    if(cb.classList.contains('done')) {
+      cb.classList.remove('done');
+      cb.textContent = '';
+    } else {
+      cb.classList.add('done');
+      cb.textContent = '✓';
+      showToast('✅ Задача выполнена');
+    }
+  }
+}
+function completeTask() {
+  closePanel('task-panel');
+  showToast('✅ Задача отмечена выполненной');
+}
+
+// ===== ADVANCE APPROVAL =====
+function approveAdvance(btn, action) {
+  const row = btn.closest('.tx-item');
+  if(action === 'approve') {
+    row.style.opacity = '0.5';
+    row.style.transition = 'opacity 0.3s';
+    showToast('✅ Аванс подтверждён');
+  } else {
+    row.style.opacity = '0.5';
+    row.style.transition = 'opacity 0.3s';
+    showToast('❌ Аванс отклонён');
+  }
+  setTimeout(() => { row.style.display = 'none'; }, 400);
+}
+
+// ===== CREATE ACTIONS =====
+function createObject() {
+  goToNewObjectForm();
+}
+function createTask() {
+  closeModal('new-task');
+  showToast('✅ Задача создана');
+}
+function createTx() {
+  closeModal('new-tx');
+  showToast('✅ Транзакция записана');
+}
+
+// ===== FOREMAN DETAIL =====
+function selectForeman(el, id) {
+  document.querySelectorAll('.foreman-item').forEach(f => f.classList.remove('selected'));
+  el.classList.add('selected');
+  const names = {f1:'Алексей Кузнецов',f2:'Дмитрий Власов',f3:'Сергей Михайлов',f4:'Николай Романов',f5:'Игорь Тихонов'};
+  const phones = {f1:'+7 (900) 123-45-67',f2:'+7 (900) 234-56-78',f3:'+7 (900) 345-67-89',f4:'+7 (900) 456-78-90',f5:'+7 (900) 567-89-01'};
+  const det = document.getElementById('foreman-detail');
+  det.querySelector('.card-title').textContent = names[id];
+  det.querySelector('.card-subtitle').textContent = phones[id];
+  buildForemanChart();
+}
+
+// ===== STAGE LIST =====
+const stages = [
+  'Подготовительные работы','Демонтажные работы','Возведение перегородок',
+  'Оштукатуривание поверхностей','Монтаж конструкций из ГКЛ','Электромонтаж (черновой)',
+  'Сантехнические работы (черновые)','Климатические системы','Устройство стяжки пола',
+  'Облицовочные работы','Предчистовая отделка','Устройство напольного покрытия',
+  'Финишная отделка стен','Чистовой монтаж оборудования','Генеральная уборка'
+];
+function buildStageList() {
+  const container = document.getElementById('stage-list');
+  container.innerHTML = stages.map((s,i) => `
+    <div class="funnel-row" onclick="selectStage(this,'${s}')">
+      <div class="funnel-name">${i+1}. ${s}</div>
+      <span style="color:var(--gray4);font-size:12px">›</span>
+    </div>
+  `).join('');
+}
+function selectStage(el, name) {
+  closeModal('change-stage');
+  closePanel('object-panel');
+  showToast('🔄 Этап изменён: ' + name);
+}
+
+// ===== CHARTS =====
+function buildMainChart() {
+  const data = [
+    {label:'Янв',val:72,active:false},{label:'Фев',val:58,active:false},
+    {label:'Мар',val:85,active:true},{label:'Апр',val:62,active:false},
+    {label:'Май',val:78,active:false},{label:'Июн',val:45,active:false}
+  ];
+  const chart = document.getElementById('main-chart');
+  const axes = document.getElementById('main-chart-axes');
+  if(!chart) return;
+  chart.innerHTML = data.map(d => `
+    <div class="chart-bar-wrap">
+      <div class="chart-bar ${d.active?'active':''}" style="height:${d.val}%"></div>
+    </div>
+  `).join('');
+  axes.innerHTML = data.map(d => `
+    <div class="chart-axis-label ${d.active?'active':''}">${d.label}</div>
+  `).join('');
+}
+function buildAnalyticsChart() {
+  const data = [
+    {label:'Окт',val:55},{label:'Ноя',val:70},{label:'Дек',val:60},
+    {label:'Янв',val:75},{label:'Фев',val:65},{label:'Мар',val:90}
+  ];
+  const chart = document.getElementById('analytics-chart');
+  const axes = document.getElementById('analytics-axes');
+  if(!chart) return;
+  chart.innerHTML = data.map(d => `
+    <div class="chart-bar-wrap">
+      <div class="chart-bar ${d.label==='Мар'?'active':''}" style="height:${d.val}%"></div>
+    </div>
+  `).join('');
+  axes.innerHTML = data.map(d => `
+    <div class="chart-axis-label ${d.label==='Мар'?'active':''}">${d.label}</div>
+  `).join('');
+}
+function buildForemanChart() {
+  const vals = [70,100,40,90,80,0,0,60,100,75,90,50,85,100];
+  const chart = document.getElementById('foreman-chart');
+  if(!chart) return;
+  chart.innerHTML = vals.map(v => `
+    <div class="chart-bar-wrap">
+      <div class="chart-bar" style="height:${Math.max(v,4)}%;${v===0?'background:var(--gray2)':''}"></div>
+    </div>
+  `).join('');
+}
+
+function goToNewObjectForm() {
+  window.location.href = './new-object-form.html';
+}
+
+function formatMoney(value) {
+  const amount = Number(value) || 0;
+  return new Intl.NumberFormat('ru-RU').format(Math.abs(amount));
+}
+
+function formatCurrency(value) {
+  const amount = Number(value) || 0;
+  const sign = amount < 0 ? '-' : '';
+  return `${sign}₽${formatMoney(amount)}`;
+}
+
+function formatSignedCurrency(value) {
+  const amount = Number(value) || 0;
+  const sign = amount > 0 ? '+' : amount < 0 ? '-' : '';
+  return `${sign}₽${formatMoney(amount)}`;
+}
+
+function formatShortDate(value) {
+  if(!value) return '—';
+  const date = new Date(value);
+  if(Number.isNaN(date.getTime())) return String(value);
+  return date.toLocaleDateString('ru-RU', { day:'numeric', month:'short' });
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
+function shortForemanName(name) {
+  if(!name) return 'Не назначен';
+  const parts = String(name).trim().split(/\s+/);
+  if(parts.length < 2) return parts[0];
+  return `${parts[0]} ${parts[1].charAt(0)}.`;
+}
+
+function objectIcon(type) {
+  const value = String(type || '').toLowerCase();
+  if(value.includes('дом')) return '🏡';
+  if(value.includes('коммер')) return '🏢';
+  return '🏠';
+}
+
+function progressTone(object) {
+  const margin = Number(object.margin_pct) || 0;
+  if(margin < 15) return 'red';
+  if(margin < 25) return 'yellow';
+  return 'green';
+}
+
+function progressPercent(object) {
+  const passed = Number(object.days_passed) || 0;
+  const left = Number(object.days_left) || 0;
+  if(passed > 0 || left > 0) {
+    return Math.max(5, Math.min(100, Math.round((passed / (passed + left || 1)) * 100)));
+  }
+  return Math.max(8, Math.min(100, Number(object.margin_pct) || 8));
+}
+
+function priorityIcon(priority) {
+  const value = String(priority || '').toLowerCase();
+  if(value.includes('high') || value.includes('выс')) return '🔴';
+  if(value.includes('medium') || value.includes('сред')) return '🟡';
+  return '⚪';
+}
+
+function taskDueLabel(task) {
+  if(task.overdue) return 'Просрочена';
+  if(task.today) return 'Сегодня';
+  return formatShortDate(task.due);
+}
+
+function renderDashboardSummary(summary) {
+  if(!summary) return;
+  document.getElementById('metric-total-balance').textContent = formatCurrency(summary.total_balance);
+  document.getElementById('metric-active-objects').textContent = summary.active_objects ?? 0;
+  document.getElementById('metric-overdue-tasks').textContent = summary.overdue_tasks ?? 0;
+  document.getElementById('metric-total-margin').textContent = formatCurrency(summary.total_margin);
+}
+
+function renderDashboardObjects(objects) {
+  const container = document.getElementById('dashboard-objects-list');
+  if(!container) return;
+  const items = objects.slice(0, 3);
+  if(items.length === 0) {
+    container.innerHTML = '<div class="text-sm text-muted">Нет объектов. Заполните «Объекты»: Наименование объекта, Дата начала работ, Дата окончания работ, Текущий этап, Прораб.</div>';
+    return;
+  }
+
+  container.innerHTML = items.map(object => {
+    const progress = progressPercent(object);
+    const tone = progressTone(object);
+    const stage = object.current_stage || 'Этап не указан';
+    const foreman = shortForemanName(object.foreman_name || object.foreman_id);
+    const deadline = object.date_end ? `до ${formatShortDate(object.date_end)}` : 'без срока';
+    return `
+      <div class="obj-item">
+        <div class="obj-thumb">${objectIcon(object.type)}</div>
+        <div class="obj-info">
+          <div class="obj-name">${escapeHtml(object.name)}</div>
+          <div class="obj-meta">${escapeHtml(foreman)} · ${escapeHtml(deadline)}</div>
+          <div style="margin-top:6px;display:flex;gap:6px;align-items:center">
+            <div class="progress flex-1"><div class="progress-fill ${tone}" style="width:${progress}%"></div></div>
+            <span class="text-xs text-muted">${escapeHtml(stage)}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderDashboardTasks(tasks) {
+  const container = document.getElementById('dashboard-hot-tasks');
+  if(!container) return;
+  const items = tasks
+    .filter(task => task.overdue || task.today)
+    .slice(0, 4);
+
+  if(items.length === 0) {
+    container.innerHTML = '<div class="text-sm text-muted">Нет срочных задач. Заполните «Журнал задач»: Объект, Задача, Срок, Статус, priority, assigned_to.</div>';
+    return;
+  }
+
+  container.innerHTML = items.map(task => `
+    <div class="task-item">
+      <div class="task-pri">${priorityIcon(task.priority)}</div>
+      <div class="task-cb"></div>
+      <div class="task-body">
+        <div class="task-text">${escapeHtml(task.task)}</div>
+        <div class="task-meta">${escapeHtml(task.object || 'Без объекта')}</div>
+      </div>
+      <div class="task-due ${task.overdue ? 'overdue' : task.today ? 'today' : 'soon'}">${escapeHtml(taskDueLabel(task))}</div>
+    </div>
+  `).join('');
+}
+
+function renderObjectsPage(objects) {
+  const grid = document.getElementById('objects-grid');
+  const archive = document.getElementById('objects-archive-body');
+  if(!grid || !archive) return;
+
+  const activeObjects = objects.filter(object => String(object.status || '').toLowerCase() !== 'archived');
+  const archivedObjects = objects.filter(object => String(object.status || '').toLowerCase() === 'archived');
+
+  const activeHtml = activeObjects.map(object => {
+    const progress = progressPercent(object);
+    const tone = progressTone(object);
+    const stage = object.current_stage || 'Этап не указан';
+    const foreman = object.foreman_name || object.foreman_id || 'Не назначен';
+    return `
+      <div class="card" style="cursor:pointer">
+        <div class="flex-between mb-8">
+          <span class="badge badge-green">В работе</span>
+          <span class="badge badge-${tone === 'red' ? 'red' : tone === 'yellow' ? 'yellow' : 'blue'}">${escapeHtml(stage)}</span>
+        </div>
+        <div class="flex flex-center gap-12 mb-8">
+          <div class="obj-thumb" style="width:44px;height:44px">${objectIcon(object.type)}</div>
+          <div>
+            <div style="font-size:14px;font-weight:700">${escapeHtml(object.name)}</div>
+            <div class="text-sm text-muted">${escapeHtml(`${object.square_meters || '—'} м² · ${object.type || 'Тип не указан'}`)}</div>
+          </div>
+        </div>
+        <div class="text-xs text-muted mb-8">👷 ${escapeHtml(foreman)} &nbsp;&nbsp; 📅 ${escapeHtml(object.date_end ? formatShortDate(object.date_end) : 'без срока')}</div>
+        <div class="flex flex-center gap-8 mb-8">
+          <div class="progress flex-1"><div class="progress-fill ${tone}" style="width:${progress}%"></div></div>
+          <span class="text-xs text-muted">${progress}%</span>
+        </div>
+        <div class="divider"></div>
+        <div class="grid" style="grid-template-columns:1fr 1fr">
+          <div><div class="text-xs text-muted">Договор</div><div class="text-sm font-bold">${escapeHtml(formatCurrency(object.contract_amount))}</div></div>
+          <div><div class="text-xs text-muted">Маржа</div><div class="text-sm font-bold">${escapeHtml(formatCurrency(object.margin))}</div></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  const emptyHint = activeObjects.length
+    ? ''
+    : `
+    <div class="card" style="border:1px dashed var(--gray3);background:transparent;box-shadow:none;display:flex;align-items:center;justify-content:center;min-height:160px">
+      <div style="text-align:center;color:var(--gray4)">
+        <div class="text-sm font-semibold">Нет объектов</div>
+        <div class="text-xs text-muted">Заполните таблицу «Объекты»</div>
+      </div>
+    </div>
+  `;
+
+  grid.innerHTML = `${emptyHint}${activeHtml}` + `
+    <div class="card" style="cursor:pointer;border:2px dashed var(--gray3);background:transparent;box-shadow:none;display:flex;align-items:center;justify-content:center;min-height:180px" onclick="goToNewObjectForm()">
+      <div style="text-align:center;color:var(--gray4)">
+        <div style="font-size:32px;margin-bottom:8px">+</div>
+        <div class="text-sm font-semibold">Добавить объект</div>
+      </div>
+    </div>
+  `;
+
+  archive.innerHTML = archivedObjects.length
+    ? archivedObjects.map(object => `
+      <tr>
+        <td>${escapeHtml(object.name)}</td>
+        <td>${escapeHtml(object.foreman_name || object.foreman_id || '—')}</td>
+        <td>${escapeHtml(object.date_end ? formatShortDate(object.date_end) : '—')}</td>
+        <td>${escapeHtml(formatCurrency(object.contract_amount))}</td>
+        <td>${escapeHtml(formatCurrency(object.margin))}</td>
+        <td><span class="badge badge-gray">Архив</span></td>
+      </tr>
+    `).join('')
+    : '<tr><td colspan="6" class="text-sm text-muted">Архив появится из «Объекты», если статус = archived.</td></tr>';
+}
+
+const apiInFlight = new Map();
+
+async function fetchApi(action, options = {}) {
+  if(apiInFlight.has(action)) {
+    return apiInFlight.get(action);
+  }
+
+  const requestPromise = (async () => {
+  if(!API_BASE_URL) {
+    throw new Error('Не заполнен apiBaseUrl в api-config.js');
+  }
+
+  const url = new URL(API_BASE_URL);
+  url.searchParams.set('action', action);
+  const response = await fetch(url.toString(), {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    ...options,
+  });
+
+  if(!response.ok) {
+    throw new Error(`API ${action}: ${response.status}`);
+  }
+
+  const rawText = await response.text();
+  if(!rawText.trim()) {
+    return {};
+  }
+
+  try {
+    return JSON.parse(rawText);
+  } catch {
+    throw new Error(`API ${action}: invalid json ${rawText.slice(0, 300)}`);
+  }
+  })();
+
+  apiInFlight.set(action, requestPromise);
+  try {
+    return await requestPromise;
+  } finally {
+    apiInFlight.delete(action);
+  }
+}
+
+async function loadLiveDashboard() {
+  const results = await Promise.allSettled([
+    fetchApi('dashboard'),
+    fetchApi('objects'),
+    fetchApi('tasks'),
+    fetchApi('team'),
+  ]);
+
+  const [dashboardRes, objectsRes, tasksRes, teamRes] = results;
+
+  if(dashboardRes.status === 'fulfilled') {
+    liveState.dashboard = dashboardRes.value;
+    renderDashboardSummary(liveState.dashboard.summary);
+  } else {
+    console.error('dashboard load error', dashboardRes.reason);
+    document.getElementById('metric-balance-caption').textContent = 'ошибка загрузки';
+  }
+
+  if(objectsRes.status === 'fulfilled') {
+    liveState.objects = objectsRes.value.objects || [];
+  } else {
+    console.error('objects load error', objectsRes.reason);
+    showToast(`Не удалось загрузить объекты: ${objectsRes.reason?.message || objectsRes.reason}`);
+  }
+
+  if(tasksRes.status === 'fulfilled') {
+    liveState.tasks = tasksRes.value.tasks || [];
+    renderDashboardTasks(liveState.tasks);
+  } else {
+    console.error('tasks load error', tasksRes.reason);
+  }
+
+  if(teamRes.status === 'fulfilled') {
+    liveState.foremen = teamRes.value.foremen || [];
+    liveState.foremenMap = new Map(liveState.foremen.map(f => [String(f.telegram_id), f.name]));
+  } else {
+    console.error('team load error', teamRes.reason);
+  }
+
+  if(liveState.objects?.length) {
+    if(liveState.foremenMap) {
+      liveState.objects = liveState.objects.map(object => ({
+        ...object,
+        foreman_name: liveState.foremenMap.get(String(object.foreman_id || '')) || object.foreman_id || '',
+      }));
+    }
+    renderDashboardObjects(liveState.objects);
+    renderObjectsPage(liveState.objects);
+  }
+
+  const activePage = document.querySelector('.page.active')?.id?.replace('page-','');
+  if(activePage === 'tasks' && liveState.tasks) renderTasksPage(liveState.tasks);
+  if(activePage === 'team' && liveState.foremen) renderTeamPage(liveState.foremen);
+}
+
+// ===== TOAST =====
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.opacity = '1';
+  setTimeout(() => { t.style.opacity = '0'; }, 2500);
+}
+
+// ===== LIVE RENDER: TASKS PAGE =====
+function renderTasksPage(tasks) {
+  const hot = tasks.filter(t => t.overdue);
+  const today = tasks.filter(t => t.today && !t.overdue);
+  const active = tasks.filter(t => (t.status||'') !== 'Выполнена');
+  const done = tasks.filter(t => (t.status||'') === 'Выполнена');
+
+  // Update tab counters
+  const tabs = document.querySelectorAll('#page-tasks .tab');
+  if(tabs[0]) tabs[0].textContent = `🔥 Просроченные (${hot.length})`;
+  if(tabs[1]) tabs[1].textContent = `📅 Сегодня (${today.length})`;
+  if(tabs[2]) tabs[2].textContent = `Все активные (${active.length})`;
+
+  function taskRow(t, mode) {
+    const pri = t.priority === 'high' ? '🔴' : t.priority === 'low' ? '⚪' : '🟡';
+    const dueLabel = taskDueLabel(t);
+    const dueCls = t.overdue ? 'overdue' : t.today ? 'today' : 'soon';
+    const foreman = liveState.foremenMap?.get(String(t.assigned_to||'')) || t.assigned_to || '';
+    if(mode === 'card') return `
+      <div class="task-item">
+        <div class="task-pri">${pri}</div>
+        <div class="task-cb"></div>
+        <div class="task-body">
+          <div class="task-text">${escapeHtml(t.task)}</div>
+          <div class="task-meta">${escapeHtml(t.object||'Без объекта')}${foreman ? ' · ' + escapeHtml(shortForemanName(foreman)) : ''}</div>
+        </div>
+        <div class="task-due ${dueCls}">${escapeHtml(dueLabel)}</div>
+      </div>`;
+    return `<tr><td>${pri}</td><td>${escapeHtml(t.task)}</td><td>${escapeHtml(t.object||'')}</td>
+      <td>${escapeHtml(foreman ? shortForemanName(foreman) : '—')}</td>
+      <td><span class="badge badge-${t.priority==='high'?'red':t.priority==='low'?'gray':'yellow'}">${t.priority==='high'?'Высокий':t.priority==='low'?'Низкий':'Средний'}</span></td>
+      <td class="task-due ${dueCls}">${escapeHtml(dueLabel)}</td>
+      <td><span class="badge badge-${t.overdue?'red':'blue'}">${escapeHtml(t.status||'')}</span></td></tr>`;
+  }
+
+  const hotEl = document.getElementById('tasks-hot');
+  if(hotEl) hotEl.innerHTML = hot.length
+    ? `<div class="grid grid-2"><div class="card">${hot.map(t=>taskRow(t,'card')).join('')}</div>
+       <div class="card"><div class="card-header"><div class="card-title">Задачи сегодня</div></div>${today.map(t=>taskRow(t,'card')).join('')||'<div class="text-sm text-muted">Нет задач на сегодня. Заполните «Журнал задач».</div>'}</div></div>`
+    : `<div class="card"><div class="text-sm text-muted" style="padding:8px">Просроченных задач нет. Заполните «Журнал задач».</div></div>`;
+
+  const todayEl = document.getElementById('tasks-today');
+  if(todayEl) todayEl.innerHTML = `<div class="card"><table class="table">
+    <thead><tr><th></th><th>Задача</th><th>Объект</th><th>Прораб</th><th>Приоритет</th><th>Срок</th></tr></thead>
+    <tbody>${today.length ? today.map(t=>taskRow(t,'table')).join('') : '<tr><td colspan="6" class="text-sm text-muted">Нет задач на сегодня. Заполните «Журнал задач».</td></tr>'}</tbody>
+  </table></div>`;
+
+  const allEl = document.getElementById('tasks-all');
+  if(allEl) allEl.innerHTML = `<div class="card"><table class="table">
+    <thead><tr><th></th><th>Задача</th><th>Объект</th><th>Прораб</th><th>Приоритет</th><th>Срок</th><th>Статус</th></tr></thead>
+    <tbody>${active.length ? active.map(t=>taskRow(t,'table')).join('') : '<tr><td colspan="7" class="text-sm text-muted">Нет активных задач. Заполните «Журнал задач».</td></tr>'}</tbody>
+  </table></div>`;
+
+  const doneEl = document.getElementById('tasks-done');
+  if(doneEl) doneEl.innerHTML = `<div class="card"><table class="table">
+    <thead><tr><th>Задача</th><th>Объект</th><th>Прораб</th><th>Выполнена</th></tr></thead>
+    <tbody>${done.length ? done.map(t=>`<tr><td style="text-decoration:line-through;color:var(--gray4)">${escapeHtml(t.task)}</td>
+      <td>${escapeHtml(t.object||'')}</td><td>${escapeHtml(t.assigned_to ? shortForemanName(liveState.foremenMap?.get(String(t.assigned_to))||t.assigned_to) : '—')}</td>
+      <td>${escapeHtml(t.date_completed||'')}</td></tr>`).join('') : '<tr><td colspan="4" class="text-sm text-muted">Нет выполненных задач. Заполните «Журнал задач» и поле date_completed.</td></tr>'}</tbody>
+  </table></div>`;
+}
+
+// ===== LIVE RENDER: FINANCE PAGE =====
+function renderFinancePage(data) {
+  const { transactions = [], total_income = 0, total_expense = 0, balance = 0 } = data;
+  const hasTx = transactions.length > 0;
+
+  // Metrics
+  const els = {
+    bal: document.querySelector('#page-finance .metric-card.dark .metric-value'),
+    inc: document.querySelectorAll('#page-finance .metric-card')[1]?.querySelector('.metric-value'),
+    exp: document.querySelectorAll('#page-finance .metric-card')[2]?.querySelector('.metric-value'),
+    prof: document.querySelectorAll('#page-finance .metric-card')[3]?.querySelector('.metric-value'),
+  };
+  if(els.bal) { els.bal.textContent = hasTx ? formatCurrency(balance) : '—'; els.bal.style.color = 'var(--gray6)'; }
+  if(els.inc) { els.inc.textContent = hasTx ? formatCurrency(total_income) : '—'; els.inc.style.color = 'var(--gray6)'; }
+  if(els.exp) { els.exp.textContent = hasTx ? formatCurrency(total_expense) : '—'; els.exp.style.color = 'var(--gray6)'; }
+  if(els.prof) { const p = total_income - total_expense; els.prof.textContent = hasTx ? formatCurrency(p) : '—'; els.prof.style.color = 'var(--gray6)'; }
+
+  function txHtml(list) {
+    if(!list.length) return '<div class="text-sm text-muted" style="padding:8px">Нет транзакций. Заполните «Транзакции»: Дата, Объект, Тип (Расход/Приход), Категория, Сумма, Описание, Ссылка на чек.</div>';
+    return list.map(t => {
+      const isIncome = t.type === 'Приход';
+      const icon = isIncome ? '💰' : (t.category === 'Материалы' ? '🧱' : t.category === 'Оплата работ' ? '👷' : t.category === 'Доставка' ? '🚗' : '💸');
+      const color = isIncome ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)';
+      const amtCls = isIncome ? 'income' : 'expense';
+      const sign = isIncome ? '+' : (t.amount < 0 ? '-' : '');
+      return `<div class="tx-item">
+        <div class="tx-icon" style="background:${color}">${icon}</div>
+        <div class="tx-info">
+          <div class="tx-desc">${escapeHtml(t.description || t.category || '')}</div>
+          <div class="tx-meta">${escapeHtml(t.object||'')} · ${escapeHtml(t.date||'')}</div>
+        </div>
+        <div class="tx-amount ${amtCls}">${formatSignedCurrency(t.amount)}</div>
+      </div>`;
+    }).join('');
+  }
+
+  const all = document.getElementById('tx-all');
+  const inc = document.getElementById('tx-income');
+  const exp = document.getElementById('tx-expense');
+  if(all) all.innerHTML = txHtml([...transactions].reverse());
+  if(inc) inc.innerHTML = txHtml(transactions.filter(t => t.type === 'Приход').reverse());
+  if(exp) exp.innerHTML = txHtml(transactions.filter(t => t.type === 'Расход').reverse());
+
+  // Margin by objects
+  const marginEl = document.querySelector('#page-finance .card:last-child');
+  if(marginEl && liveState.objects?.length) {
+    const objsWithData = liveState.objects.filter(o => o.contract_amount > 0);
+    if(objsWithData.length) {
+      const rows = objsWithData.map(o => {
+        const pct = o.margin_pct || 0;
+        const tone = pct > 30 ? 'green' : pct > 15 ? 'yellow' : 'red';
+        return `<div style="margin-bottom:14px">
+          <div class="flex-between mb-8" style="font-size:12px">
+            <span>${escapeHtml(o.name)}</span>
+            <span style="color:var(--gray6);font-weight:700">₽${formatMoney(o.margin)} <span style="color:var(--gray4)">(${pct}%)</span></span>
+          </div>
+          <div class="progress"><div class="progress-fill ${tone}" style="width:${Math.min(pct,100)}%"></div></div>
+        </div>`;
+      }).join('');
+      const totalMargin = objsWithData.reduce((s,o) => s + (o.margin||0), 0);
+      marginEl.innerHTML = `<div class="card-header"><div class="card-title">Маржа по объектам</div></div>
+        ${rows}
+        <div class="divider"></div>
+        <div class="flex-between">
+          <span class="text-sm text-muted">Суммарная маржа</span>
+          <span style="font-size:18px;font-weight:800;color:var(--gray6)">₽${formatMoney(totalMargin)}</span>
+        </div>`;
+    }
+  }
+}
+
+// ===== LIVE RENDER: TEAM PAGE =====
+function renderTeamPage(foremen) {
+  const listEl = document.getElementById('team-list');
+  if(!listEl || !foremen.length) return;
+
+  const colors = ['linear-gradient(135deg,#1a1a1a,#3a3a3a)','linear-gradient(135deg,#1e3a5f,#2563eb)','linear-gradient(135deg,#064e3b,#10b981)','linear-gradient(135deg,#4b5563,#6b7280)','linear-gradient(135deg,#3b0764,#7c3aed)'];
+
+  const items = foremen.map((f, i) => {
+    const initials = f.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    const objCount = (liveState.objects||[]).filter(o => String(o.foreman_id) === String(f.telegram_id)).length;
+    const color = colors[i % colors.length];
+    const dots = Array.from({length:5}, (_,di) => `<div class="load-dot${di < objCount ? ' active' : ''}"></div>`).join('');
+    return `<div class="foreman-item" onclick="selectForeman(this,'${f.row_number}')" style="cursor:pointer">
+      <div class="foreman-av" style="background:${color}">${escapeHtml(initials)}</div>
+      <div class="foreman-info">
+        <div class="foreman-name">${escapeHtml(f.name)}</div>
+        <div class="foreman-meta">${objCount} объект${objCount===1?'':'а'} · ${escapeHtml(f.phone||f.role||'')}</div>
+        <div class="load-dots">${dots}</div>
+      </div>
+      <div style="text-align:right">
+        <div class="text-xs text-muted">${escapeHtml(f.role === 'owner' ? 'Владелец' : 'Прораб')}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  listEl.innerHTML = `<div class="grid grid-2">
+    <div>${items}</div>
+    <div class="card" id="foreman-detail">
+      <div style="text-align:center;padding:32px;color:var(--gray4)">
+        <div style="font-size:32px;margin-bottom:8px">👷</div>
+        <div class="text-sm">Выберите прораба слева</div>
+      </div>
+    </div>
+  </div>`;
+
+  // Rating table
+  const ratingEl = document.getElementById('team-rating');
+  if(ratingEl) ratingEl.innerHTML = `<div class="card"><div class="card-header"><div class="card-title">Прорабы</div></div>
+    <table class="table"><thead><tr><th>#</th><th>Прораб</th><th>Роль</th><th>Телефон</th><th>Объектов</th></tr></thead>
+    <tbody>${foremen.map((f,i) => {
+      const cnt = (liveState.objects||[]).filter(o => String(o.foreman_id) === String(f.telegram_id)).length;
+      return `<tr><td style="font-weight:700">${i+1}</td><td>${escapeHtml(f.name)}</td>
+        <td>${escapeHtml(f.role==='owner'?'Владелец':'Прораб')}</td>
+        <td>${escapeHtml(f.phone||'—')}</td><td>${cnt}</td></tr>`;
+    }).join('')}</tbody></table></div>`;
+}
+
+// ===== LIVE RENDER: ANALYTICS PAGE =====
+function renderAnalyticsPage(objects, transactions) {
+  const tbody = document.querySelector('#page-analytics table tbody');
+  if(tbody && objects.length) {
+    tbody.innerHTML = objects.filter(o => o.contract_amount > 0).map(o => {
+      const pct = o.margin_pct || 0;
+      const tone = pct > 30 ? 'green' : pct > 15 ? 'yellow' : 'red';
+      return `<tr>
+        <td>${escapeHtml(o.name)}</td>
+        <td>₽${formatMoney(o.contract_amount)}</td>
+        <td>₽${formatMoney(o.expense)}</td>
+        <td style="color:var(--gray6);font-weight:600">${pct}%</td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="4" class="text-sm text-muted">Нет данных — заполните суммы договоров</td></tr>';
+  }
+
+  // Category breakdown from transactions
+  const catTotals = {};
+  transactions.filter(t => t.type === 'Расход').forEach(t => {
+    catTotals[t.category] = (catTotals[t.category] || 0) + Math.abs(t.amount);
+  });
+  const totalExp = Object.values(catTotals).reduce((s,v) => s+v, 0);
+  const catEl = document.querySelector('#page-analytics .analytics-bar-row')?.closest('.card');
+  if(catEl && totalExp > 0) {
+    const sorted = Object.entries(catTotals).sort((a,b) => b[1]-a[1]).slice(0,5);
+    catEl.innerHTML = `<div class="card-header"><div class="card-title">Топ расходов</div></div>` +
+      sorted.map(([cat, amt]) => {
+        const pct = Math.round((amt/totalExp)*100);
+        return `<div class="analytics-bar-row">
+          <div class="analytics-bar-label">${escapeHtml(cat)}</div>
+          <div class="analytics-bar-track"><div class="analytics-bar-fill" style="width:${pct}%"></div></div>
+          <div class="analytics-bar-val">${pct}%</div>
+        </div>`;
+      }).join('');
+  }
+}
+
+// ===== LIVE RENDER: CRM PAGE =====
+function renderCrmPage(leads) {
+  const el = document.getElementById('crm-leads');
+  if(!el) return;
+
+  const tabs = document.querySelectorAll('#page-crm .tab');
+  if(tabs[0]) tabs[0].textContent = `Лиды (${leads.length})`;
+
+  const statusColors = { 'переговоры':'blue','замер':'yellow','смета':'yellow','договор':'green' };
+  el.innerHTML = leads.length ? `<div class="card"><table class="table">
+    <thead><tr><th>Имя</th><th>Телефон</th><th>Адрес</th><th>Статус</th><th>Источник</th><th>Сумма</th></tr></thead>
+    <tbody>${leads.map(l => `<tr>
+      <td style="font-weight:600">${escapeHtml(l.client_name||'—')}</td>
+      <td>${escapeHtml(l.phone||'—')}</td>
+      <td>${escapeHtml(l.address||'—')}</td>
+      <td><span class="badge badge-${statusColors[l.status]||'gray'}">${escapeHtml(l.status||'—')}</span></td>
+      <td>${escapeHtml(l.source||'—')}</td>
+      <td>${l.amount ? formatCurrency(l.amount) : '—'}</td>
+    </tr>`).join('')}</tbody>
+  </table></div>` : `<div class="card"><div class="text-sm text-muted" style="padding:16px">Лидов пока нет. Заполните «Лиды»: client_name, phone, address, status, source, amount, notes.</div></div>`;
+}
+
+function refreshPageData(page, { force = false } = {}) {
+  if(page === 'dashboard') {
+    return loadLiveDashboard().catch(console.error);
+  }
+  if(page === 'objects') {
+    return fetchApi('objects').then(d => {
+      liveState.objects = d.objects || [];
+      renderObjectsPage(liveState.objects);
+    }).catch(console.error);
+  }
+  if(page === 'tasks') {
+    return fetchApi('tasks').then(d => {
+      liveState.tasks = d.tasks || [];
+      renderTasksPage(liveState.tasks);
+    }).catch(console.error);
+  }
+  if(page === 'finance') {
+    return fetchApi('finance').then(d => {
+      liveState.finance = d;
+      renderFinancePage(d);
+    }).catch(console.error);
+  }
+  if(page === 'team') {
+    return fetchApi('team').then(d => {
+      liveState.foremen = d.foremen || [];
+      renderTeamPage(liveState.foremen);
+    }).catch(console.error);
+  }
+  if(page === 'analytics') {
+    const objectsPromise = force ? fetchApi('objects') : Promise.resolve({ objects: liveState.objects || [] });
+    const financePromise = force ? fetchApi('finance') : Promise.resolve(liveState.finance || { transactions: [] });
+    return Promise.all([objectsPromise, financePromise]).then(([objRes, finRes]) => {
+      if(objRes?.objects) liveState.objects = objRes.objects;
+      if(finRes) liveState.finance = finRes;
+      renderAnalyticsPage(liveState.objects || [], liveState.finance?.transactions || []);
+    }).catch(console.error);
+  }
+  if(page === 'crm') {
+    return fetchApi('leads').then(d => {
+      liveState.leads = d.leads || [];
+      renderCrmPage(liveState.leads);
+    }).catch(console.error);
+  }
+  return Promise.resolve();
+}
+
+// ===== PATCH navigate() — загружать данные при переходе =====
+const _origNavigate = navigate;
+navigate = function(page) {
+  _origNavigate(page);
+  refreshPageData(page, { force: true });
+};
+
+// ===== loadLiveDashboard already handles team/tasks/objects =====
+
+async function loadPartials() {
+  const nodes = document.querySelectorAll('[data-partial]');
+  await Promise.all(Array.from(nodes).map(async (el) => {
+    const url = el.getAttribute('data-partial');
+    if(!url) return;
+    try {
+      const res = await fetch(url, { cache: 'no-store' });
+      if(!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+      el.innerHTML = await res.text();
+    } catch (err) {
+      console.error('Partial load failed:', url, err);
+      el.innerHTML = `<div class="card"><div class="text-sm text-muted" style="padding:16px">Не удалось загрузить блок: ${escapeHtml(url)}</div></div>`;
+    }
+  }));
+}
+  
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadPartials();
+  buildMainChart();
+  buildAnalyticsChart();
+  buildForemanChart();
+  loadLiveDashboard().then(() => {
+  // re-render current page with live data after load
+  const activePage = document.querySelector('.page.active')?.id?.replace('page-','');
+  if(activePage) navigate(activePage);
+});
+  
+  // Activate first items for tabs that need it
+  // Set initial nav state
+  navigate('dashboard');
+  
+  // Re-activate dashboard nav since navigate resets it
+  document.querySelector('[onclick="navigate(\'dashboard\')"]').classList.add('active');
+  document.getElementById('topbar-controls').style.display = 'flex';
+  
+  // Keyboard: ESC closes panels/modals
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Escape') {
+      document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+      document.querySelectorAll('.detail-panel.open').forEach(p => p.classList.remove('open'));
+    }
+  });
+
+  // Auto refresh current page every 30 seconds
+  setInterval(() => {
+    const activePage = document.querySelector('.page.active')?.id?.replace('page-','');
+    if(activePage) refreshPageData(activePage);
+  }, 30000);
+});
+</script>
+</body>
+</html>

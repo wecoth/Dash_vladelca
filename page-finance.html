@@ -1,0 +1,76 @@
+      <!-- METRICS -->
+      <div class="grid grid-4 mb-16">
+        <div class="metric-card dark">
+          <div class="metric-label">Общий баланс</div>
+          <div class="metric-value">—</div>
+          <div class="text-xs text-muted" style="margin-top:6px">Источник: «Транзакции» → Сумма, Тип (Расход/Приход)</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Поступило (март)</div>
+          <div class="metric-value">—</div>
+          <div class="text-xs text-muted" style="margin-top:6px">Источник: «Транзакции» → Тип = Приход</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Расходы (март)</div>
+          <div class="metric-value">—</div>
+          <div class="text-xs text-muted" style="margin-top:6px">Источник: «Транзакции» → Тип = Расход</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Прибыль (март)</div>
+          <div class="metric-value">—</div>
+          <div class="text-xs text-muted" style="margin-top:6px">Расчет: Поступления − Расходы</div>
+        </div>
+      </div>
+
+      <div class="grid" style="grid-template-columns:1.6fr 1fr">
+        <!-- TRANSACTIONS -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Транзакции</div>
+            <div style="display:flex;gap:8px">
+              <select class="select" style="width:140px;font-size:12px">
+                <option>Все объекты</option>
+                <option>ЖК Любимого</option>
+                <option>мкр. Покровский</option>
+              </select>
+              <button class="btn btn-outline btn-sm">📤 Экспорт</button>
+              <button class="btn btn-primary btn-sm" onclick="openModal('new-tx')">+ Добавить</button>
+            </div>
+          </div>
+          <div class="tabs">
+            <div class="tab active" onclick="setTab(this,'tx-all')">Все</div>
+            <div class="tab" onclick="setTab(this,'tx-income')">Поступления</div>
+            <div class="tab" onclick="setTab(this,'tx-expense')">Расходы</div>
+            <div class="tab" onclick="setTab(this,'tx-pending')">⏳ Ожидают</div>
+          </div>
+          <div id="tx-all">
+            <div class="text-sm text-muted" style="padding:8px">
+              Нет данных по транзакциям. Заполните таблицу «Транзакции»:
+              <strong>Дата</strong>, <strong>Объект</strong>, <strong>Тип (Расход/Приход)</strong>,
+              <strong>Категория</strong>, <strong>Сумма</strong>, <strong>Описание</strong>, <strong>Ссылка на чек</strong>.
+            </div>
+          </div>
+          <div id="tx-income" style="display:none">
+            <div class="text-sm text-muted" style="padding:8px">Поступления появятся из «Транзакции» с Тип = Приход.</div>
+          </div>
+          <div id="tx-expense" style="display:none">
+            <div class="text-sm text-muted" style="padding:8px">Расходы появятся из «Транзакции» с Тип = Расход.</div>
+          </div>
+          <div id="tx-pending" style="display:none">
+            <div class="text-sm text-muted" style="padding:8px">
+              Ожидаемые транши берутся из «Транши»:
+              <strong>object_row</strong>, <strong>label</strong>, <strong>amount</strong>,
+              <strong>expected_date</strong>, <strong>paid_date</strong>, <strong>status</strong>.
+            </div>
+          </div>
+        </div>
+
+        <!-- MARGINS -->
+        <div class="card">
+          <div class="card-header"><div class="card-title">Маржа по объектам</div></div>
+          <div class="text-sm text-muted" style="padding:12px">
+            Маржа рассчитывается из «Объекты»: <strong>Всего получено (Авансы)</strong>,
+            <strong>Всего потрачено (Расходы)</strong>, <strong>Текущий остаток (Баланс)</strong>.
+          </div>
+        </div>
+      </div>
